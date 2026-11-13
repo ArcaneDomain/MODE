@@ -15,6 +15,11 @@
   width: 100%;
 }
 
+/* Ensure localization wrapper never intercepts percentage sizing between host and .vjs-mode-skin */
+.mode-v10-player-host > media-i18n {
+  display: contents;
+}
+
 .vjs-mode-skin {
   /* Public Video.js v10 Custom Properties */
   --_scale: var(--media-scale-unit, 4px);
@@ -60,11 +65,16 @@
   transition: box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease;
 }
 
+/* Keep media out of flex flow so square/portrait videos cannot push .vjs-mode-skin taller than its container and clip bottom controls */
 .vjs-mode-skin ::slotted(video),
 .vjs-mode-skin video {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
   object-fit: cover;
   border-radius: inherit;
   background: #000;
