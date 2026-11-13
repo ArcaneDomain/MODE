@@ -77,6 +77,7 @@ export class ModeSkinController {
   private smpteRafId: number | null = null;
   private hlsInstance: Hls | null = null;
   private renditionList!: HlsRenditionList;
+  private lastStreamIsHls = false;
 
   constructor(mountEl: HTMLElement, config: ModePlayerConfig) {
     this.root = mountEl;
@@ -524,6 +525,14 @@ export class ModeSkinController {
                             <media-icon class="video-chevron-icon media-menu-forward-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
                           </span>
                         </media-menu-item>
+                        <media-menu-item id="${p}-quality-fallback-trigger" commandfor="${p}-quality-fallback-menu" class="video-menu-item media-menu-trigger-item mode-quality-fallback-trigger">
+                          <media-icon class="video-menu-item-icon video-icon mode-dynamic-icon" family="default" name="switches"></media-icon>
+                          <media-text class="video-menu-item-label" token="menu.quality">Quality</media-text>
+                          <span class="media-menu-hint">
+                            <span id="${p}-quality-fallback-value" class="video-menu-button-value">Auto</span>
+                            <media-icon class="video-chevron-icon media-menu-forward-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
+                          </span>
+                        </media-menu-item>
 
                         <media-menu-item commandfor="${p}-rate-menu" class="video-menu-item media-menu-trigger-item">
                           <media-icon class="video-menu-item-icon video-icon mode-dynamic-icon" family="default" name="speed"></media-icon>
@@ -542,6 +551,23 @@ export class ModeSkinController {
                             <media-icon class="video-chevron-icon media-menu-forward-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
                           </span>
                         </media-menu-item>
+                      </media-menu-content>
+
+                      <media-menu-content id="${p}-quality-fallback-menu" class="video-menu-content">
+                        <media-menu-item class="video-menu-item media-menu-back-item">
+                          <media-icon class="video-chevron-icon media-menu-back-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
+                          <media-text class="video-menu-item-label" token="menu.quality">Quality</media-text>
+                        </media-menu-item>
+                        <media-menu-separator class="video-menu-separator"></media-menu-separator>
+                        <media-menu-item id="${p}-quality-fallback-option" class="video-menu-item video-radio" data-checked>
+                          <media-icon class="video-radio-check media-menu-item-indicator video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
+                          <span class="video-menu-item-label">
+                            <span id="${p}-quality-fallback-option-label">Auto</span>
+                            <sup id="${p}-quality-fallback-tier" class="mode-menu-tier"></sup>
+                          </span>
+                          <span id="${p}-quality-fallback-badge" class="mode-menu-bitrate-badge">Source</span>
+                        </media-menu-item>
+                        <div id="${p}-quality-fallback-note" class="mode-quality-fallback-note">Single-file source — manual resolution switching appears on multi-bitrate HLS streams.</div>
                       </media-menu-content>
 
                       <media-menu-content id="${p}-quality-menu" class="video-menu-content">
@@ -628,30 +654,119 @@ export class ModeSkinController {
     this.renditionList?.clear();
 
     const isHls = src.includes('.m3u8') || src.includes('stream.mux.com');
-    if (isHls && !this.videoEl.canPlayType('application/vnd.apple.mpegurl') && Hls.isSupported()) {
+    this.lastStreamIsHls = isHls;
+    const canPlayNativeHls = Boolean(
+      this.videoEl.canPlayType('application/vnd.apple.mpegurl')
+      || this.videoEl.canPlayType('application/x-mpegurl'),
+    );
+    const hasMse = typeof MediaSource !== 'undefined'
+      || typeof (window as Window & { ManagedMediaSource?: unknown }).ManagedMediaSource !== 'undefined';
+
+    if (isHls && Hls.isSupported() && (!canPlayNativeHls || hasMse)) {
+      if (this.videoEl.hasAttribute('src')) {
+        this.videoEl.removeAttribute('src');
+        this.videoEl.load();
+      }
       const hls = new Hls({
         enableWorker: true,
-        lowLatencyMode: true,
+        lowLatencyMode: false,
         capLevelToPlayerSize: false,
         startLevel: -1,
         abrEwmaDefaultEstimate: getInitialBandwidthEstimate(),
       });
-      hls.loadSource(src);
-      hls.attachMedia(this.videoEl);
+      let recoveredMediaError = false;
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
+        if (this.hlsInstance !== hls) return;
         if (data.levels && data.levels.length > 0) {
           // Default to ABR Auto (-1) so hls.js picks the optimal quality for downstream speed
           hls.currentLevel = -1;
           const initialActive = hls.loadLevel >= 0 ? hls.loadLevel : hls.nextAutoLevel;
           this.renditionList?.setHlsLevels(hls, data.levels, initialActive);
         }
+        this.syncQualityFallbackUI();
       });
       hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+        if (this.hlsInstance !== hls) return;
         this.renditionList?.syncActiveLevel(data.level);
       });
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (!data.fatal || this.hlsInstance !== hls) return;
+        if (data.type === Hls.ErrorTypes.MEDIA_ERROR && !recoveredMediaError) {
+          recoveredMediaError = true;
+          hls.recoverMediaError();
+          return;
+        }
+        if (canPlayNativeHls) {
+          hls.destroy();
+          if (this.hlsInstance === hls) {
+            this.hlsInstance = null;
+            this.renditionList?.clear();
+            this.videoEl.src = src;
+            this.syncQualityFallbackUI();
+          }
+        }
+      });
       this.hlsInstance = hls;
+      hls.attachMedia(this.videoEl);
+      hls.loadSource(src);
     } else {
       this.videoEl.src = src;
+    }
+
+    this.syncQualityFallbackUI();
+  }
+
+  private syncQualityFallbackUI(): void {
+    const p = this.prefix;
+    const fallbackTrigger = this.root.querySelector(`#${p}-quality-fallback-trigger`) as HTMLElement | null;
+    if (!fallbackTrigger) return;
+
+    const hasMultiQuality = (this.renditionList?.length ?? 0) > 1;
+    if (hasMultiQuality) {
+      fallbackTrigger.setAttribute('data-hidden', '');
+      fallbackTrigger.setAttribute('aria-hidden', 'true');
+      const fallbackMenu = this.root.querySelector(`#${p}-quality-fallback-menu`) as (HTMLElement & { close?: () => void }) | null;
+      if (fallbackMenu && !fallbackMenu.hidden) {
+        fallbackMenu.close?.();
+      }
+      return;
+    }
+
+    fallbackTrigger.removeAttribute('data-hidden');
+    fallbackTrigger.removeAttribute('aria-hidden');
+
+    const w = this.videoEl?.videoWidth ?? 0;
+    const h = this.videoEl?.videoHeight ?? 0;
+    const shortSide = w > 0 && h > 0 ? Math.min(w, h) : h;
+    const resLabel = shortSide > 0 ? `${shortSide}p` : '';
+    const displayVal = resLabel ? `Auto (${resLabel})` : 'Auto';
+    const tier = shortSide >= 2160 ? '4K' : shortSide >= 1080 ? 'HD' : '';
+
+    const valEl = this.root.querySelector(`#${p}-quality-fallback-value`);
+    if (valEl) valEl.textContent = displayVal;
+
+    const optLabelEl = this.root.querySelector(`#${p}-quality-fallback-option-label`);
+    if (optLabelEl) optLabelEl.textContent = displayVal;
+
+    const tierEl = this.root.querySelector(`#${p}-quality-fallback-tier`);
+    if (tierEl) tierEl.textContent = tier;
+
+    const badgeEl = this.root.querySelector(`#${p}-quality-fallback-badge`);
+    const noteEl = this.root.querySelector(`#${p}-quality-fallback-note`);
+    if (this.lastStreamIsHls) {
+      if (this.hlsInstance && (this.renditionList?.length ?? 0) === 0) {
+        if (badgeEl) badgeEl.textContent = 'ABR';
+        if (noteEl) noteEl.textContent = 'Detecting downstream speed and adaptive HLS renditions...';
+      } else if ((this.renditionList?.length ?? 0) === 1) {
+        if (badgeEl) badgeEl.textContent = 'HLS';
+        if (noteEl) noteEl.textContent = 'Single-rendition HLS stream — manual levels appear when multiple bitrates exist.';
+      } else {
+        if (badgeEl) badgeEl.textContent = 'ABR';
+        if (noteEl) noteEl.textContent = 'Browser-managed adaptive HLS streaming based on downstream speed.';
+      }
+    } else {
+      if (badgeEl) badgeEl.textContent = 'MP4';
+      if (noteEl) noteEl.textContent = 'Single-file source — manual resolution switching appears on multi-bitrate HLS streams.';
     }
   }
 
@@ -874,6 +989,13 @@ export class ModeSkinController {
         this.chillEngine.setSleepTimer(sec);
       });
     });
+
+    // Sync fallback quality display with video metadata & HLS rendition changes
+    this.videoEl.addEventListener('loadedmetadata', () => this.syncQualityFallbackUI());
+    this.videoEl.addEventListener('resize', () => this.syncQualityFallbackUI());
+    this.renditionList?.addEventListener('addrendition', () => this.syncQualityFallbackUI());
+    this.renditionList?.addEventListener('removerendition', () => this.syncQualityFallbackUI());
+    this.syncQualityFallbackUI();
   }
 
   private updateEdgeSwatches(colors: EdgeColors): void {

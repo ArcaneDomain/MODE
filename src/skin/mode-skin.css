@@ -1607,6 +1607,8 @@ body.mode-theater-dimmed .mode-v10-player-host {
 .video-menu-content[hidden],
 .video-menu-content:not([data-submenu])[data-child-open],
 .video-menu-item[hidden],
+.video-menu-item[data-hidden],
+.video-menu-content:has(.media-menu-trigger-item[commandfor$="-quality-menu"][data-availability="available"]) .mode-quality-fallback-trigger,
 .video-menu-item[data-availability="unavailable"],
 .video-menu-item[data-availability="unsupported"],
 .video-radio-group[hidden] {
@@ -1733,9 +1735,24 @@ body.mode-theater-dimmed .mode-v10-player-host {
   transition: opacity 0.15s ease;
 }
 
-.video-radio[aria-checked="true"] .video-radio-check {
+.video-radio[aria-checked="true"] .video-radio-check,
+.video-radio[data-checked] .video-radio-check {
   opacity: 1;
   color: var(--_accent-color);
+}
+
+.mode-quality-fallback-note {
+  margin: 4px 2px 2px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--_text-secondary);
+  font-size: 0.68rem;
+  line-height: 1.38;
+}
+
+.vjs-mode-skin[data-mode="study"] .mode-quality-fallback-note {
+  background: rgba(17, 24, 39, 0.05);
 }
 
 .video-tooltip {

@@ -147,8 +147,14 @@ export class HlsRenditionList extends EventTarget {
  * Video.js v10's `qualityFeature` binds on `loadstart`.
  */
 export function attachRenditionsBridge(videoEl: HTMLVideoElement): HlsRenditionList {
+  const existing = (videoEl as unknown as { videoRenditions?: unknown }).videoRenditions;
+  if (existing instanceof HlsRenditionList) {
+    return existing;
+  }
+
   const list = new HlsRenditionList();
-  if (!('videoRenditions' in videoEl)) {
+  const ownDesc = Object.getOwnPropertyDescriptor(videoEl, 'videoRenditions');
+  if (!ownDesc || ownDesc.configurable) {
     Object.defineProperty(videoEl, 'videoRenditions', {
       value: list,
       configurable: true,
