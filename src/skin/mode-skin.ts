@@ -5,38 +5,12 @@
  * for "MODE — A Video.js v10 Skin for Every Occasion" (Apache-2.0).
  */
 
-// Official Video.js v10 Core & UI Element Registrations
+// Official Video.js v10 Core & UI Element Registrations (complete compound controls, sliders, menus, tooltips)
 import '@videojs/html/video/player';
-import '@videojs/html/i18n';
+import '@videojs/html/video/ui';
 import '@videojs/html/i18n/locales/all';
 import '@videojs/html/icons/element';
-import '@videojs/html/ui/alert-dialog';
-import '@videojs/html/ui/buffering-indicator';
-import '@videojs/html/ui/captions-button';
-import '@videojs/html/ui/captions-radio-group';
-import '@videojs/html/ui/container';
-import '@videojs/html/ui/controls';
-import '@videojs/html/ui/error-dialog';
-import '@videojs/html/ui/fullscreen-button';
-import '@videojs/html/ui/gesture';
-import '@videojs/html/ui/hotkey';
-import '@videojs/html/ui/menu';
-import '@videojs/html/ui/mute-button';
-import '@videojs/html/ui/pip-button';
-import '@videojs/html/ui/play-button';
-import '@videojs/html/ui/playback-rate-radio-group';
-import '@videojs/html/ui/popover';
-import '@videojs/html/ui/poster';
-import '@videojs/html/ui/quality-radio-group';
-import '@videojs/html/ui/seek-button';
-import '@videojs/html/ui/slider';
-import '@videojs/html/ui/status-announcer';
-import '@videojs/html/ui/thumbnail';
-import '@videojs/html/ui/time';
-import '@videojs/html/ui/time-slider';
-import '@videojs/html/ui/tooltip';
 import '@videojs/html/ui/volume-popover';
-import '@videojs/html/ui/volume-slider';
 
 import { EdgeColorEngine, type EdgeColors } from './engines/EdgeColorEngine';
 import { MusicVisualEngine } from './engines/MusicVisualEngine';
@@ -203,15 +177,15 @@ export class ModeSkinController {
 
             <!-- Error Dialog -->
             <media-error-dialog class="video-error-dialog">
-              <div class="video-error-dialog-surface media-surface">
+              <media-dialog-popup class="video-error-dialog-surface media-surface">
                 <div class="video-error-dialog-content">
-                  <media-alert-dialog-title class="video-error-dialog-title"></media-alert-dialog-title>
-                  <media-alert-dialog-description class="video-error-dialog-description"></media-alert-dialog-description>
+                  <media-dialog-title class="video-error-dialog-title"></media-dialog-title>
+                  <media-dialog-description class="video-error-dialog-description"></media-dialog-description>
                 </div>
                 <div class="video-error-dialog-actions">
-                  <media-alert-dialog-close class="media-button media-button--subtle video-error-dialog-close"></media-alert-dialog-close>
+                  <media-dialog-close class="media-button media-button--subtle video-error-dialog-close"></media-dialog-close>
                 </div>
-              </div>
+              </media-dialog-popup>
             </media-error-dialog>
 
             <!-- ============================================================
@@ -541,8 +515,8 @@ export class ModeSkinController {
 
                         <media-menu-separator class="video-menu-separator"></media-menu-separator>
 
-                        <!-- Native Video.js v10 Submenus (Quality, Speed, Subtitles/CC) -->
-                        <media-menu-item commandfor="${p}-quality-menu" class="media-button media-button--subtle video-menu-item media-menu-trigger-item">
+                        <!-- Native Video.js v10 Submenu Triggers (Quality, Speed, Subtitles/CC) -->
+                        <media-menu-item commandfor="${p}-quality-menu" class="video-menu-item media-menu-trigger-item">
                           <media-icon class="video-menu-item-icon video-icon mode-dynamic-icon" family="default" name="switches"></media-icon>
                           <media-text class="video-menu-item-label" token="menu.quality">Quality</media-text>
                           <span class="media-menu-hint">
@@ -550,27 +524,8 @@ export class ModeSkinController {
                             <media-icon class="video-chevron-icon media-menu-forward-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
                           </span>
                         </media-menu-item>
-                        <media-menu-content id="${p}-quality-menu" class="video-menu-content">
-                          <media-menu-item class="media-button media-button--subtle video-menu-item media-menu-back-item">
-                            <media-icon class="video-chevron-icon media-menu-back-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
-                            <media-text class="video-menu-item-label" token="menu.quality">Quality</media-text>
-                          </media-menu-item>
-                          <media-menu-separator class="video-menu-separator"></media-menu-separator>
-                          <media-quality-radio-group class="video-radio-group">
-                            <template>
-                              <media-menu-radio-item class="media-button media-button--subtle video-menu-item video-radio media-menu-radio-item">
-                                <media-icon class="video-radio-check media-menu-item-indicator video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
-                                <span class="video-menu-item-label">
-                                  <span data-part="label"></span>
-                                  <sup data-part="tier" class="mode-menu-tier"></sup>
-                                </span>
-                                <span data-part="badge" class="mode-menu-bitrate-badge"></span>
-                              </media-menu-radio-item>
-                            </template>
-                          </media-quality-radio-group>
-                        </media-menu-content>
 
-                        <media-menu-item commandfor="${p}-rate-menu" class="media-button media-button--subtle video-menu-item media-menu-trigger-item">
+                        <media-menu-item commandfor="${p}-rate-menu" class="video-menu-item media-menu-trigger-item">
                           <media-icon class="video-menu-item-icon video-icon mode-dynamic-icon" family="default" name="speed"></media-icon>
                           <media-text class="video-menu-item-label" token="menu.speed">Speed</media-text>
                           <span class="media-menu-hint">
@@ -578,23 +533,8 @@ export class ModeSkinController {
                             <media-icon class="video-chevron-icon media-menu-forward-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
                           </span>
                         </media-menu-item>
-                        <media-menu-content id="${p}-rate-menu" class="video-menu-content">
-                          <media-menu-item class="media-button media-button--subtle video-menu-item media-menu-back-item">
-                            <media-icon class="video-chevron-icon media-menu-back-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
-                            <media-text class="video-menu-item-label" token="menu.speed">Speed</media-text>
-                          </media-menu-item>
-                          <media-menu-separator class="video-menu-separator"></media-menu-separator>
-                          <media-playback-rate-radio-group class="video-radio-group">
-                            <template>
-                              <media-menu-radio-item class="media-button media-button--subtle video-menu-item video-radio media-menu-radio-item">
-                                <media-icon class="video-radio-check media-menu-item-indicator video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
-                                <span class="video-menu-item-label" data-part="label"></span>
-                              </media-menu-radio-item>
-                            </template>
-                          </media-playback-rate-radio-group>
-                        </media-menu-content>
 
-                        <media-menu-item commandfor="${p}-captions-menu" class="media-button media-button--subtle video-menu-item media-menu-trigger-item">
+                        <media-menu-item commandfor="${p}-captions-menu" class="video-menu-item media-menu-trigger-item">
                           <media-icon class="video-menu-item-icon video-icon mode-dynamic-icon" family="default" name="speech"></media-icon>
                           <media-text class="video-menu-item-label" token="menu.captions">Subtitles / CC</media-text>
                           <span class="media-menu-hint">
@@ -602,21 +542,58 @@ export class ModeSkinController {
                             <media-icon class="video-chevron-icon media-menu-forward-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
                           </span>
                         </media-menu-item>
-                        <media-menu-content id="${p}-captions-menu" class="video-menu-content">
-                          <media-menu-item class="media-button media-button--subtle video-menu-item media-menu-back-item">
-                            <media-icon class="video-chevron-icon media-menu-back-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
-                            <media-text class="video-menu-item-label" token="menu.captions">Subtitles / CC</media-text>
-                          </media-menu-item>
-                          <media-menu-separator class="video-menu-separator"></media-menu-separator>
-                          <media-captions-radio-group class="video-radio-group">
-                            <template>
-                              <media-menu-radio-item class="media-button media-button--subtle video-menu-item video-radio media-menu-radio-item">
-                                <media-icon class="video-radio-check media-menu-item-indicator video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
-                                <span class="video-menu-item-label" data-part="label"></span>
-                              </media-menu-radio-item>
-                            </template>
-                          </media-captions-radio-group>
-                        </media-menu-content>
+                      </media-menu-content>
+
+                      <media-menu-content id="${p}-quality-menu" class="video-menu-content">
+                        <media-menu-item class="video-menu-item media-menu-back-item">
+                          <media-icon class="video-chevron-icon media-menu-back-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
+                          <media-text class="video-menu-item-label" token="menu.quality">Quality</media-text>
+                        </media-menu-item>
+                        <media-menu-separator class="video-menu-separator"></media-menu-separator>
+                        <media-quality-radio-group class="video-radio-group">
+                          <template>
+                            <media-menu-radio-item class="video-menu-item video-radio media-menu-radio-item">
+                              <media-icon class="video-radio-check media-menu-item-indicator video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
+                              <span class="video-menu-item-label">
+                                <span data-part="label"></span>
+                                <sup data-part="tier" class="mode-menu-tier"></sup>
+                              </span>
+                              <span data-part="badge" class="mode-menu-bitrate-badge"></span>
+                            </media-menu-radio-item>
+                          </template>
+                        </media-quality-radio-group>
+                      </media-menu-content>
+
+                      <media-menu-content id="${p}-rate-menu" class="video-menu-content">
+                        <media-menu-item class="video-menu-item media-menu-back-item">
+                          <media-icon class="video-chevron-icon media-menu-back-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
+                          <media-text class="video-menu-item-label" token="menu.speed">Speed</media-text>
+                        </media-menu-item>
+                        <media-menu-separator class="video-menu-separator"></media-menu-separator>
+                        <media-playback-rate-radio-group class="video-radio-group">
+                          <template>
+                            <media-menu-radio-item class="video-menu-item video-radio media-menu-radio-item">
+                              <media-icon class="video-radio-check media-menu-item-indicator video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
+                              <span class="video-menu-item-label" data-part="label"></span>
+                            </media-menu-radio-item>
+                          </template>
+                        </media-playback-rate-radio-group>
+                      </media-menu-content>
+
+                      <media-menu-content id="${p}-captions-menu" class="video-menu-content">
+                        <media-menu-item class="video-menu-item media-menu-back-item">
+                          <media-icon class="video-chevron-icon media-menu-back-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
+                          <media-text class="video-menu-item-label" token="menu.captions">Subtitles / CC</media-text>
+                        </media-menu-item>
+                        <media-menu-separator class="video-menu-separator"></media-menu-separator>
+                        <media-captions-radio-group class="video-radio-group">
+                          <template>
+                            <media-menu-radio-item class="video-menu-item video-radio media-menu-radio-item">
+                              <media-icon class="video-radio-check media-menu-item-indicator video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
+                              <span class="video-menu-item-label" data-part="label"></span>
+                            </media-menu-radio-item>
+                          </template>
+                        </media-captions-radio-group>
                       </media-menu-content>
                     </media-menu>
 
