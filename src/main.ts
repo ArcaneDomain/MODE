@@ -15,6 +15,7 @@ import {
   BRIGHT_SOLAR_CUES,
   DYREWOOD_BOOKMARKS,
   DYREWOOD_CUES,
+  MODE_EXPLAINER_CAPTION_TRACKS,
   MUX_DEMO_BOOKMARKS,
   MUX_DEMO_CUES,
 } from './scenario-cues';
@@ -115,6 +116,7 @@ function initWorkbench(): void {
     posterSrc: initialScenario.poster,
     storyboardVtt: initialScenario.storyboardVtt,
     chaptersVtt: initialScenario.chaptersVtt,
+    captionTracks: MODE_EXPLAINER_CAPTION_TRACKS,
     captions: initialScenario.captions,
     bookmarks: initialScenario.bookmarks,
     muxPlaybackId: initialScenario.muxPlaybackId,

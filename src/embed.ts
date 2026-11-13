@@ -7,6 +7,11 @@
 
 import './skin/mode-skin.css';
 import { ModeSkinController, type ModePreset } from './skin/mode-skin';
+import {
+  ARCANE_SONIC_BOOKMARKS,
+  MODE_EXPLAINER_CAPTION_TRACKS,
+  MODE_EXPLAINER_CUES,
+} from './scenario-cues';
 
 const STORM_MUX_ID = 'LRH6O8v9nAchc02njUk59MosxoHhvvReqiFNcqAP01a5w';
 
@@ -32,6 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
     posterSrc,
     storyboardVtt,
     chaptersVtt,
+    captionTracks: MODE_EXPLAINER_CAPTION_TRACKS,
+    captions: videoSrc.includes(STORM_MUX_ID) ? MODE_EXPLAINER_CUES : undefined,
+    bookmarks: videoSrc.includes(STORM_MUX_ID) ? ARCANE_SONIC_BOOKMARKS : undefined,
     muxPlaybackId: STORM_MUX_ID,
     onStateChange: (state) => {
       if (window.parent && window.parent !== window) {

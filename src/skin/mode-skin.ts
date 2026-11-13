@@ -15,7 +15,6 @@ import '@videojs/html/ui/volume-popover';
 import { EdgeColorEngine, type EdgeColors } from './engines/EdgeColorEngine';
 import { MusicVisualEngine } from './engines/MusicVisualEngine';
 import {
-  DEFAULT_POLYGLOT_CUES,
   StudyToolsEngine,
   SUPPORTED_LOCALES,
   type PolyglotCue,
@@ -31,6 +30,14 @@ import Hls from 'hls.js';
 
 export type ModePreset = 'movie' | 'music' | 'study' | 'chill' | 'skeleton';
 
+export interface ModeCaptionTrack {
+  kind?: 'captions' | 'subtitles';
+  srclang: string;
+  label: string;
+  src: string;
+  default?: boolean;
+}
+
 export interface ModePlayerConfig {
   idPrefix?: string;
   initialMode?: ModePreset;
@@ -40,6 +47,7 @@ export interface ModePlayerConfig {
   posterSrc?: string;
   storyboardVtt?: string;
   chaptersVtt?: string;
+  captionTracks?: ModeCaptionTrack[];
   captions?: PolyglotCue[];
   bookmarks?: StudyBookmark[];
   muxPlaybackId?: string;
@@ -107,10 +115,16 @@ export class ModeSkinController {
     const storyboardTrack = this.config.storyboardVtt
       ? `<track kind="metadata" label="thumbnails" default data-mode-track="thumbnails" src="${this.config.storyboardVtt}" />`
       : '';
-    const chaptersUrl = 'chaptersVtt' in this.config ? this.config.chaptersVtt : './tracks/chapters-en.vtt';
+    const chaptersUrl = this.config.chaptersVtt;
     const chaptersTrack = chaptersUrl
       ? `<track kind="chapters" srclang="en" label="Chapters" default data-mode-track="chapters" src="${chaptersUrl}" />`
       : '';
+    const captionTracksHtml = (this.config.captionTracks ?? [])
+      .map(
+        (t) =>
+          `<track kind="${t.kind || 'subtitles'}" srclang="${t.srclang}" label="${t.label}" src="${t.src}"${t.default ? ' default' : ''} />`,
+      )
+      .join('\n              ');
 
     const localeOptionsHtml = SUPPORTED_LOCALES.map(
       (l) => `<option value="${l.code}">${l.native}</option>`
@@ -163,11 +177,7 @@ export class ModeSkinController {
               crossorigin="anonymous"
             >
               ${storyboardTrack}
-              <track kind="captions" srclang="en" label="English" src="./tracks/captions-en.vtt" default />
-              <track kind="subtitles" srclang="es" label="Español" src="./tracks/captions-es.vtt" />
-              <track kind="subtitles" srclang="fr" label="Français" src="./tracks/captions-fr.vtt" />
-              <track kind="subtitles" srclang="de" label="Deutsch" src="./tracks/captions-de.vtt" />
-              <track kind="subtitles" srclang="ja" label="日本語" src="./tracks/captions-ja.vtt" />
+              ${captionTracksHtml}
               ${chaptersTrack}
             </video>
 
@@ -299,20 +309,18 @@ export class ModeSkinController {
                  UNIVERSAL LIVE CAPTION OVERLAY (Movie, Music, Chill, Skeleton)
                  Synced with Video.js v10 <media-captions-button> & TextTracks
                  ============================================================ -->
-            <div id="${p}-live-caption-box" class="mode-live-captions" aria-live="polite">
-              <span id="${p}-live-caption-text">Welcome to MODE — an adaptive Video.js v10 skin engineered for every viewing occasion.</span>
+            <div id="${p}-live-caption-box" class="mode-live-captions" aria-live="polite" style="display: none;">
+              <span id="${p}-live-caption-text"></span>
             </div>
 
             <!-- ============================================================
                  STUDY MODE: LIVE DUAL-CAPTION POLYGLOT OVERLAY
                  ============================================================ -->
-            <div id="${p}-dual-caption-box" class="mode-dual-captions mode-only-study" aria-live="polite">
-              <div class="mode-dual-caption-primary" id="${p}-caption-primary">
-                Welcome to MODE — an adaptive Video.js v10 skin engineered for every viewing occasion.
-              </div>
+            <div id="${p}-dual-caption-box" class="mode-dual-captions mode-only-study" aria-live="polite" style="display: none;">
+              <div class="mode-dual-caption-primary" id="${p}-caption-primary"></div>
               <div class="mode-dual-caption-translated" id="${p}-caption-translated">
                 <span class="mode-lang-pill" id="${p}-caption-lang-badge">ES</span>
-                <span id="${p}-caption-target-text">Bienvenido a MODE — una interfaz adaptable de Video.js v10 diseñada para cada ocasión.</span>
+                <span id="${p}-caption-target-text"></span>
               </div>
             </div>
 
@@ -814,8 +822,8 @@ export class ModeSkinController {
     });
     if (this.config.captions !== undefined || this.config.bookmarks !== undefined) {
       this.studyEngine.setCues(
-        this.config.captions ?? DEFAULT_POLYGLOT_CUES,
-        this.config.bookmarks,
+        this.config.captions ?? [],
+        this.config.bookmarks ?? [],
       );
     }
 
@@ -851,9 +859,23 @@ export class ModeSkinController {
     };
     this.smpteRafId = requestAnimationFrame(updateSmpte);
 
-    this.videoEl.textTracks?.addEventListener('change', () => {
-      this.updateStudyUI();
-    });
+    const bindTrackCueListener = (track: TextTrack) => {
+      if (track.kind === 'captions' || track.kind === 'subtitles') {
+        track.addEventListener('cuechange', () => this.updateStudyUI());
+      }
+    };
+    if (this.videoEl.textTracks) {
+      for (let i = 0; i < this.videoEl.textTracks.length; i++) {
+        bindTrackCueListener(this.videoEl.textTracks[i]);
+      }
+      this.videoEl.textTracks.addEventListener('addtrack', (ev) => {
+        if (ev.track) bindTrackCueListener(ev.track);
+        this.updateStudyUI();
+      });
+      this.videoEl.textTracks.addEventListener('change', () => {
+        this.updateStudyUI();
+      });
+    }
 
     this.updateStudyUI();
   }
@@ -1043,40 +1065,66 @@ export class ModeSkinController {
     const liveCaptionBox = this.root.querySelector(`#${p}-live-caption-box`) as HTMLElement | null;
     const liveCaptionText = this.root.querySelector(`#${p}-live-caption-text`) as HTMLElement | null;
 
+    let showingTrack: TextTrack | null = null;
+    let targetTrack: TextTrack | null = null;
     let showingLang: string | null = null;
     const tracks = this.videoEl.textTracks;
     if (tracks && tracks.length > 0) {
       for (let i = 0; i < tracks.length; i++) {
         const tr = tracks[i];
-        if ((tr.kind === 'captions' || tr.kind === 'subtitles') && tr.mode === 'showing') {
-          showingLang = tr.language || 'en';
-          break;
+        if (tr.kind === 'captions' || tr.kind === 'subtitles') {
+          if (!showingTrack && tr.mode === 'showing') {
+            showingTrack = tr;
+            showingLang = tr.language || 'en';
+          }
+          if (!targetTrack && tr.language === targetLang) {
+            targetTrack = tr;
+          }
         }
       }
     } else {
       showingLang = 'en';
     }
 
+    const activeTrackCue = showingTrack?.activeCues?.[0] as (TextTrackCue & { text?: string }) | undefined;
+    const activeTargetCue = targetTrack?.activeCues?.[0] as (TextTrackCue & { text?: string }) | undefined;
+    const nativeText = (activeTrackCue?.text || '').trim();
+    const nativeTargetText = (activeTargetCue?.text || '').trim();
+
+    const standardText =
+      (cue && showingLang
+        ? cue.translations[showingLang] || cue.translations[primaryLang] || cue.translations.en
+        : '') || nativeText;
+
     const showStandardCaptions =
-      cue !== null && showingLang !== null && !(this.currentMode === 'study' && dualOn);
+      Boolean(standardText) && showingLang !== null && !(this.currentMode === 'study' && dualOn);
 
     if (liveCaptionBox) {
       liveCaptionBox.style.display = showStandardCaptions ? 'inline-flex' : 'none';
     }
-    if (liveCaptionText && showingLang && cue) {
-      liveCaptionText.textContent =
-        cue.translations[showingLang] || cue.translations[primaryLang] || cue.translations.en;
+    if (liveCaptionText) {
+      liveCaptionText.textContent = standardText;
     }
+
+    const dualPrimaryText =
+      (cue ? cue.translations[primaryLang] || cue.translations.en : '') || nativeText;
+    const dualTranslatedText =
+      (cue ? cue.translations[targetLang] || cue.translations.es : '') || nativeTargetText;
 
     this.containerEl.setAttribute('data-dual-cc', dualOn ? 'on' : 'off');
     if (dualBox) {
-      dualBox.style.display = cue !== null && this.currentMode === 'study' && dualOn ? 'flex' : 'none';
+      dualBox.style.display =
+        Boolean(dualPrimaryText) && this.currentMode === 'study' && dualOn ? 'flex' : 'none';
     }
-    if (primaryEl && cue) {
-      primaryEl.textContent = cue.translations[primaryLang] || cue.translations.en;
+    if (primaryEl) {
+      primaryEl.textContent = dualPrimaryText;
     }
-    if (targetTextEl && cue) {
-      targetTextEl.textContent = cue.translations[targetLang] || cue.translations.es;
+    if (targetTextEl) {
+      targetTextEl.textContent = dualTranslatedText;
+      const translatedRow = targetTextEl.parentElement;
+      if (translatedRow) {
+        translatedRow.style.display = dualTranslatedText ? 'flex' : 'none';
+      }
     }
     if (badgeEl) {
       badgeEl.textContent = targetLang.toUpperCase();
@@ -1112,16 +1160,47 @@ export class ModeSkinController {
 
     const activeCue = this.studyEngine.getActiveCue();
     const targetLang = this.studyEngine.getTargetTranslationLang();
-    const cues = this.studyEngine.getCues().filter((c) => {
+    let engineCues = this.studyEngine.getCues();
+
+    if (engineCues.length === 0 && this.videoEl.textTracks) {
+      let captionTrack: TextTrack | null = null;
+      for (let i = 0; i < this.videoEl.textTracks.length; i++) {
+        const tr = this.videoEl.textTracks[i];
+        if (tr.kind === 'captions' || tr.kind === 'subtitles') {
+          if (tr.mode === 'showing' || !captionTrack) {
+            captionTrack = tr;
+            if (tr.mode === 'showing') break;
+          }
+        }
+      }
+      if (captionTrack?.cues && captionTrack.cues.length > 0) {
+        engineCues = Array.from(captionTrack.cues).map((c, idx) => ({
+          id: `native-${idx}`,
+          start: c.startTime,
+          end: c.endTime,
+          translations: { en: (c as TextTrackCue & { text?: string }).text || '' },
+        }));
+      }
+    }
+
+    const cues = engineCues.filter((c) => {
       if (!this.transcriptFilter) return true;
       const enText = (c.translations.en || '').toLowerCase();
       const trText = (c.translations[targetLang] || '').toLowerCase();
       return enText.includes(this.transcriptFilter) || trText.includes(this.transcriptFilter);
     });
 
+    if (cues.length === 0) {
+      listEl.innerHTML = `<div class="mode-transcript-empty" style="padding:10px 8px;opacity:0.65;font-size:0.72rem;">No captions loaded for this video.</div>`;
+      return;
+    }
+
     listEl.innerHTML = cues
       .map((c) => {
-        const isActive = activeCue ? c.id === activeCue.id : false;
+        const isActive = activeCue
+          ? c.id === activeCue.id
+          : this.videoEl.currentTime >= c.start && this.videoEl.currentTime <= c.end;
+        const translated = c.translations[targetLang] || '';
         return `
           <button
             type="button"
@@ -1132,7 +1211,7 @@ export class ModeSkinController {
             <span class="mode-cue-time">${this.studyEngine.formatTime(c.start)}</span>
             <span class="mode-cue-texts">
               <span class="mode-cue-en">${c.translations.en}</span>
-              <span class="mode-cue-tr">[${targetLang.toUpperCase()}] ${c.translations[targetLang] || c.translations.es}</span>
+              ${translated ? `<span class="mode-cue-tr">[${targetLang.toUpperCase()}] ${translated}</span>` : ''}
             </span>
           </button>
         `;
@@ -1802,8 +1881,8 @@ export class ModeSkinController {
 
     if (options.captions !== undefined || options.bookmarks !== undefined) {
       this.studyEngine.setCues(
-        options.captions ?? DEFAULT_POLYGLOT_CUES,
-        options.bookmarks,
+        options.captions ?? [],
+        options.bookmarks ?? [],
       );
     }
 
