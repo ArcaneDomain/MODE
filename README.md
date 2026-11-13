@@ -69,6 +69,7 @@ MODE/
     ├── skin/                       # Portable MODE Skin (bare essentials)
     │   ├── mode-skin.css           # All 5 preset tokens, container queries & a11y styles
     │   ├── mode-skin.ts            # Video.js v10 custom elements & ModeSkinController
+    │   ├── hls-renditions.ts       # hls.js ABR Auto & quality bridge to Video.js v10
     │   └── engines/
     │       ├── EdgeColorEngine.ts  # 15fps canvas video-edge RGB sampler
     │       ├── MusicVisualEngine.ts# Web Audio AnalyserNode + perimeter spark orbit

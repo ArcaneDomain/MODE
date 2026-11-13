@@ -42,6 +42,11 @@ import { EdgeColorEngine, type EdgeColors } from './engines/EdgeColorEngine';
 import { MusicVisualEngine } from './engines/MusicVisualEngine';
 import { StudyToolsEngine, SUPPORTED_LOCALES } from './engines/StudyToolsEngine';
 import { ChillEngine } from './engines/ChillEngine';
+import {
+  attachRenditionsBridge,
+  getInitialBandwidthEstimate,
+  type HlsRenditionList,
+} from './hls-renditions';
 import Hls from 'hls.js';
 
 export type ModePreset = 'movie' | 'music' | 'study' | 'chill' | 'skeleton';
@@ -97,6 +102,7 @@ export class ModeSkinController {
   private lastPopoutActiveCueId = '';
   private smpteRafId: number | null = null;
   private hlsInstance: Hls | null = null;
+  private renditionList!: HlsRenditionList;
 
   constructor(mountEl: HTMLElement, config: ModePlayerConfig) {
     this.root = mountEl;
@@ -180,13 +186,13 @@ export class ModeSkinController {
             <!-- Poster Image -->
             <media-poster class="video-poster" ${this.config.posterSrc ? `src="${this.config.posterSrc}"` : ''}></media-poster>
 
-            <!-- Touch & Pointer Gestures -->
-            <media-gesture action="togglePaused" pointer="mouse" event="click"></media-gesture>
-            <media-gesture action="toggleControls" pointer="touch" event="tap"></media-gesture>
-            <media-gesture action="toggleFullscreen" event="dblclick"></media-gesture>
-            <media-gesture action="seekStep" value="-10" event="dbltap" region="left"></media-gesture>
-            <media-gesture action="togglePaused" event="dbltap" region="center"></media-gesture>
-            <media-gesture action="seekStep" value="10" event="dbltap" region="right"></media-gesture>
+            <!-- Touch & Pointer Gestures (Click anywhere on stage to play/pause like YouTube) -->
+            <media-gesture type="tap" action="togglePaused" pointer="mouse"></media-gesture>
+            <media-gesture type="doubletap" action="toggleFullscreen" pointer="mouse"></media-gesture>
+            <media-gesture type="tap" action="toggleControls" pointer="touch"></media-gesture>
+            <media-gesture type="doubletap" action="seekStep" value="-10" pointer="touch" region="left"></media-gesture>
+            <media-gesture type="doubletap" action="toggleFullscreen" pointer="touch" region="center"></media-gesture>
+            <media-gesture type="doubletap" action="seekStep" value="10" pointer="touch" region="right"></media-gesture>
 
             <!-- Buffering Spinner -->
             <media-buffering-indicator class="video-buffering-indicator">
@@ -211,7 +217,7 @@ export class ModeSkinController {
             <!-- ============================================================
                  TOP CONTEXTUAL MODE BAR (Mode Switcher + FX Toggle + Pin)
                  ============================================================ -->
-            <div class="mode-top-bar" role="toolbar" aria-label="MODE Skin Preset and Effect Controls">
+            <div class="mode-top-bar" data-interactive="" role="toolbar" aria-label="MODE Skin Preset and Effect Controls">
               <div class="mode-top-left">
                 <span class="mode-brand-badge" title="MODE — Video.js v10 Adaptive Skin">
                   <span class="mode-brand-dot"></span>
@@ -325,7 +331,7 @@ export class ModeSkinController {
             <!-- ============================================================
                  STUDY MODE: INTERACTIVE POLYGLOT TRANSCRIPT & BOOKMARKS DRAWER
                  ============================================================ -->
-            <aside id="${p}-transcript-drawer" class="mode-transcript-drawer mode-only-study" aria-label="Interactive Study Transcript and Bookmarks" hidden>
+            <aside id="${p}-transcript-drawer" class="mode-transcript-drawer mode-only-study" data-interactive="" aria-label="Interactive Study Transcript and Bookmarks" hidden>
               <div class="mode-transcript-header">
                 <div class="mode-transcript-title-row">
                   <strong>📖 Polyglot Transcript &amp; Study Notes</strong>
@@ -367,7 +373,7 @@ export class ModeSkinController {
                  ============================================================ -->
             <media-controls class="video-controls">
               <!-- STUDY MODE UTILITY STRIP (Polyglot i18n SDK + Subtitle Translator + A-B Loop) -->
-              <div class="mode-study-ribbon mode-only-study" role="region" aria-label="Study Mode Translation and Loop Tools">
+              <div class="mode-study-ribbon mode-only-study" data-interactive="" role="region" aria-label="Study Mode Translation and Loop Tools">
                 <div class="mode-study-group">
                   <label class="mode-study-label" for="${p}-ui-locale-select" title="Video.js v10 <media-i18n> Live Control Bar Localization">
                     <span>🌐 UI SDK:</span>
@@ -401,7 +407,7 @@ export class ModeSkinController {
               </div>
 
               <!-- MAIN CONTROL BAR SURFACE -->
-              <media-controls-content class="video-controls-content media-surface">
+              <media-controls-content class="video-controls-content media-surface" data-interactive="">
                 <!-- Music Mode Audio-Reactive Canvas (Aurora Wave + Mirrored Spectrum + Bass Particles) -->
                 <canvas id="${p}-music-viz-canvas" class="mode-music-viz-canvas" aria-hidden="true"></canvas>
                 <!-- Music Mode Perimeter Spark Orbit Canvas (Arcane Domain Signature Comet Trail) -->
@@ -500,18 +506,22 @@ export class ModeSkinController {
                     </media-captions-button>
                     <media-tooltip trigger="${p}-captions-button" side="top" class="media-surface video-tooltip"></media-tooltip>
 
-                    <!-- Settings Menu Button + Nested Popover Menus (Playback Rate, Subtitles, Quality, Mode Options) -->
-                    <media-menu-button
+                    <!-- Settings Menu Button + Nested Popover Menus (Quality ABR, Playback Rate, Subtitles, Mode Options) -->
+                    <button
+                      type="button"
                       id="${p}-settings-button"
                       commandfor="${p}-settings-menu"
                       class="media-button media-button--subtle media-button--icon video-settings-button"
+                      aria-label="Settings"
                     >
                       <media-icon class="video-settings-icon video-icon mode-dynamic-icon" family="default" name="gear"></media-icon>
-                    </media-menu-button>
-                    <media-tooltip trigger="${p}-settings-button" side="top" class="media-surface video-tooltip"></media-tooltip>
+                    </button>
+                    <media-tooltip trigger="${p}-settings-button" side="top" class="media-surface video-tooltip">
+                      <media-text token="menu.settings">Settings</media-text>
+                    </media-tooltip>
 
-                    <media-menu id="${p}-settings-menu" side="top" align="end" class="video-menu">
-                      <div class="video-menu-surface media-surface">
+                    <media-menu id="${p}-settings-menu" side="top" align="end" class="video-menu media-surface" data-interactive="">
+                      <media-menu-content class="video-menu-content">
                         <!-- Custom MODE Quick Settings inside native Video.js v10 Menu -->
                         <div class="mode-menu-custom-section">
                           <div class="mode-menu-section-heading">MODE SKIN CONTROLS</div>
@@ -529,64 +539,85 @@ export class ModeSkinController {
                           </button>
                         </div>
 
-                        <!-- Native Video.js v10 Submenus -->
-                        <media-menu-button commandfor="${p}-rate-menu" class="media-button media-button--subtle video-menu-item video-menu-button">
+                        <media-menu-separator class="video-menu-separator"></media-menu-separator>
+
+                        <!-- Native Video.js v10 Submenus (Quality, Speed, Subtitles/CC) -->
+                        <media-menu-item commandfor="${p}-quality-menu" class="media-button media-button--subtle video-menu-item media-menu-trigger-item">
+                          <media-icon class="video-menu-item-icon video-icon mode-dynamic-icon" family="default" name="switches"></media-icon>
+                          <media-text class="video-menu-item-label" token="menu.quality">Quality</media-text>
+                          <span class="media-menu-hint">
+                            <span data-part="value" class="video-menu-button-value"></span>
+                            <media-icon class="video-chevron-icon media-menu-forward-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
+                          </span>
+                        </media-menu-item>
+                        <media-menu-content id="${p}-quality-menu" class="video-menu-content">
+                          <media-menu-item class="media-button media-button--subtle video-menu-item media-menu-back-item">
+                            <media-icon class="video-chevron-icon media-menu-back-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
+                            <media-text class="video-menu-item-label" token="menu.quality">Quality</media-text>
+                          </media-menu-item>
+                          <media-menu-separator class="video-menu-separator"></media-menu-separator>
+                          <media-quality-radio-group class="video-radio-group">
+                            <template>
+                              <media-menu-radio-item class="media-button media-button--subtle video-menu-item video-radio media-menu-radio-item">
+                                <media-icon class="video-radio-check media-menu-item-indicator video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
+                                <span class="video-menu-item-label">
+                                  <span data-part="label"></span>
+                                  <sup data-part="tier" class="mode-menu-tier"></sup>
+                                </span>
+                                <span data-part="badge" class="mode-menu-bitrate-badge"></span>
+                              </media-menu-radio-item>
+                            </template>
+                          </media-quality-radio-group>
+                        </media-menu-content>
+
+                        <media-menu-item commandfor="${p}-rate-menu" class="media-button media-button--subtle video-menu-item media-menu-trigger-item">
                           <media-icon class="video-menu-item-icon video-icon mode-dynamic-icon" family="default" name="speed"></media-icon>
-                          <span class="video-menu-item-label">Speed</span>
-                          <media-playback-rate-value class="video-menu-button-value"></media-playback-rate-value>
-                          <media-icon class="video-chevron-icon video-icon mode-dynamic-icon" family="default" name="chevron" direction="right"></media-icon>
-                        </media-menu-button>
-                        <media-menu id="${p}-rate-menu" class="video-menu">
-                          <div class="video-menu-surface media-surface">
-                            <media-playback-rate-radio-group class="video-radio-group">
-                              <template>
-                                <media-playback-rate-radio-item class="media-button media-button--subtle video-menu-item video-radio">
-                                  <media-icon class="video-radio-check video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
-                                  <span class="video-menu-item-label" data-slot="label"></span>
-                                </media-playback-rate-radio-item>
-                              </template>
-                            </media-playback-rate-radio-group>
-                          </div>
-                        </media-menu>
+                          <media-text class="video-menu-item-label" token="menu.speed">Speed</media-text>
+                          <span class="media-menu-hint">
+                            <span data-part="value" class="video-menu-button-value"></span>
+                            <media-icon class="video-chevron-icon media-menu-forward-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
+                          </span>
+                        </media-menu-item>
+                        <media-menu-content id="${p}-rate-menu" class="video-menu-content">
+                          <media-menu-item class="media-button media-button--subtle video-menu-item media-menu-back-item">
+                            <media-icon class="video-chevron-icon media-menu-back-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
+                            <media-text class="video-menu-item-label" token="menu.speed">Speed</media-text>
+                          </media-menu-item>
+                          <media-menu-separator class="video-menu-separator"></media-menu-separator>
+                          <media-playback-rate-radio-group class="video-radio-group">
+                            <template>
+                              <media-menu-radio-item class="media-button media-button--subtle video-menu-item video-radio media-menu-radio-item">
+                                <media-icon class="video-radio-check media-menu-item-indicator video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
+                                <span class="video-menu-item-label" data-part="label"></span>
+                              </media-menu-radio-item>
+                            </template>
+                          </media-playback-rate-radio-group>
+                        </media-menu-content>
 
-                        <media-menu-button commandfor="${p}-captions-menu" class="media-button media-button--subtle video-menu-item video-menu-button">
+                        <media-menu-item commandfor="${p}-captions-menu" class="media-button media-button--subtle video-menu-item media-menu-trigger-item">
                           <media-icon class="video-menu-item-icon video-icon mode-dynamic-icon" family="default" name="speech"></media-icon>
-                          <span class="video-menu-item-label">Subtitles / CC</span>
-                          <media-captions-value class="video-menu-button-value"></media-captions-value>
-                          <media-icon class="video-chevron-icon video-icon mode-dynamic-icon" family="default" name="chevron" direction="right"></media-icon>
-                        </media-menu-button>
-                        <media-menu id="${p}-captions-menu" class="video-menu">
-                          <div class="video-menu-surface media-surface">
-                            <media-captions-radio-group class="video-radio-group">
-                              <template>
-                                <media-captions-radio-item class="media-button media-button--subtle video-menu-item video-radio">
-                                  <media-icon class="video-radio-check video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
-                                  <span class="video-menu-item-label" data-slot="label"></span>
-                                </media-captions-radio-item>
-                              </template>
-                            </media-captions-radio-group>
-                          </div>
-                        </media-menu>
-
-                        <media-menu-button commandfor="${p}-quality-menu" class="media-button media-button--subtle video-menu-item video-menu-button">
-                          <media-icon class="video-menu-item-icon video-icon mode-dynamic-icon" family="default" name="quality"></media-icon>
-                          <span class="video-menu-item-label">Quality</span>
-                          <media-quality-value class="video-menu-button-value"></media-quality-value>
-                          <media-icon class="video-chevron-icon video-icon mode-dynamic-icon" family="default" name="chevron" direction="right"></media-icon>
-                        </media-menu-button>
-                        <media-menu id="${p}-quality-menu" class="video-menu">
-                          <div class="video-menu-surface media-surface">
-                            <media-quality-radio-group class="video-radio-group">
-                              <template>
-                                <media-quality-radio-item class="media-button media-button--subtle video-menu-item video-radio">
-                                  <media-icon class="video-radio-check video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
-                                  <span class="video-menu-item-label" data-slot="label"></span>
-                                </media-quality-radio-item>
-                              </template>
-                            </media-quality-radio-group>
-                          </div>
-                        </media-menu>
-                      </div>
+                          <media-text class="video-menu-item-label" token="menu.captions">Subtitles / CC</media-text>
+                          <span class="media-menu-hint">
+                            <span data-part="value" class="video-menu-button-value"></span>
+                            <media-icon class="video-chevron-icon media-menu-forward-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
+                          </span>
+                        </media-menu-item>
+                        <media-menu-content id="${p}-captions-menu" class="video-menu-content">
+                          <media-menu-item class="media-button media-button--subtle video-menu-item media-menu-back-item">
+                            <media-icon class="video-chevron-icon media-menu-back-chevron video-icon mode-dynamic-icon" family="default" name="chevron"></media-icon>
+                            <media-text class="video-menu-item-label" token="menu.captions">Subtitles / CC</media-text>
+                          </media-menu-item>
+                          <media-menu-separator class="video-menu-separator"></media-menu-separator>
+                          <media-captions-radio-group class="video-radio-group">
+                            <template>
+                              <media-menu-radio-item class="media-button media-button--subtle video-menu-item video-radio media-menu-radio-item">
+                                <media-icon class="video-radio-check media-menu-item-indicator video-icon mode-dynamic-icon" family="default" name="check"></media-icon>
+                                <span class="video-menu-item-label" data-part="label"></span>
+                              </media-menu-radio-item>
+                            </template>
+                          </media-captions-radio-group>
+                        </media-menu-content>
+                      </media-menu-content>
                     </media-menu>
 
                     <!-- Picture-in-Picture Button -->
@@ -617,6 +648,7 @@ export class ModeSkinController {
       this.hlsInstance.destroy();
       this.hlsInstance = null;
     }
+    this.renditionList?.clear();
 
     const isHls = src.includes('.m3u8') || src.includes('stream.mux.com');
     if (isHls && !this.videoEl.canPlayType('application/vnd.apple.mpegurl') && Hls.isSupported()) {
@@ -624,15 +656,21 @@ export class ModeSkinController {
         enableWorker: true,
         lowLatencyMode: true,
         capLevelToPlayerSize: false,
+        startLevel: -1,
+        abrEwmaDefaultEstimate: getInitialBandwidthEstimate(),
       });
       hls.loadSource(src);
       hls.attachMedia(this.videoEl);
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
         if (data.levels && data.levels.length > 0) {
-          // Default to 1080p rendition if available, or highest available level
-          const tenEightyIdx = data.levels.findIndex((lvl) => lvl.height === 1080);
-          hls.currentLevel = tenEightyIdx !== -1 ? tenEightyIdx : data.levels.length - 1;
+          // Default to ABR Auto (-1) so hls.js picks the optimal quality for downstream speed
+          hls.currentLevel = -1;
+          const initialActive = hls.loadLevel >= 0 ? hls.loadLevel : hls.nextAutoLevel;
+          this.renditionList?.setHlsLevels(hls, data.levels, initialActive);
         }
+      });
+      hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+        this.renditionList?.syncActiveLevel(data.level);
       });
       this.hlsInstance = hls;
     } else {
@@ -645,6 +683,8 @@ export class ModeSkinController {
     this.i18nEl = this.root.querySelector(`#${p}-i18n`) as HTMLElement;
     this.containerEl = this.root.querySelector(`#${p}-container`) as HTMLElement;
     this.videoEl = this.root.querySelector(`#${p}-video`) as HTMLVideoElement;
+    this.renditionList = attachRenditionsBridge(this.videoEl);
+    this.videoEl.dispatchEvent(new Event('loadstart'));
     this.loadStreamSource(this.config.videoSrc);
 
     const vizCanvas = this.root.querySelector(`#${p}-music-viz-canvas`) as HTMLCanvasElement;

@@ -68,6 +68,7 @@
   object-fit: cover;
   border-radius: inherit;
   background: #000;
+  cursor: pointer;
 }
 
 /* Deterministic Live Captions Overlay (Synced with Video.js v10 <media-captions-button> & TextTracks)
@@ -350,7 +351,7 @@ body.mode-theater-dimmed .mode-v10-player-host {
 
 .vjs-mode-skin[data-mode="skeleton"] .video-controls-content,
 .vjs-mode-skin[data-mode="skeleton"] .mode-top-bar,
-.vjs-mode-skin[data-mode="skeleton"] .video-menu-surface,
+.vjs-mode-skin[data-mode="skeleton"] .video-menu,
 .vjs-mode-skin[data-mode="skeleton"] .video-volume-popover-surface,
 .vjs-mode-skin[data-mode="skeleton"] .video-tooltip {
   background: rgba(0, 0, 0, 0.25) !important;
@@ -362,7 +363,7 @@ body.mode-theater-dimmed .mode-v10-player-host {
 
 .vjs-mode-skin[data-mode="skeleton"] .media-button,
 .vjs-mode-skin[data-mode="skeleton"] .video-time,
-.vjs-mode-skin[data-mode="skeleton"] .video-menu-surface,
+.vjs-mode-skin[data-mode="skeleton"] .video-menu,
 .vjs-mode-skin[data-mode="skeleton"] .mode-menu-toggle-row {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 4px rgba(0, 0, 0, 0.85);
 }
@@ -1450,9 +1451,8 @@ body.mode-theater-dimmed .mode-v10-player-host {
 /* ==========================================================================
    11. VOLUME POPOVER, SETTINGS MENU & TOOLTIPS
    ========================================================================== */
-.vjs-mode-skin [popover],
+.vjs-mode-skin [popover]:not(.video-menu),
 .video-volume-popover,
-.video-menu,
 .video-tooltip {
   z-index: 30;
   background: transparent !important;
@@ -1506,8 +1506,13 @@ body.mode-theater-dimmed .mode-v10-player-host {
   scale: 1;
 }
 
-.video-menu-surface {
-  min-width: 236px;
+.vjs-mode-skin .video-menu {
+  z-index: 30;
+  margin: 0;
+  outline: none;
+  min-width: 248px;
+  max-height: min(360px, 72cqb);
+  overflow-y: auto;
   padding: 8px;
   border-radius: var(--_control-radius, 18px);
   background: var(--_surface-bg);
@@ -1516,10 +1521,12 @@ body.mode-theater-dimmed .mode-v10-player-host {
   backdrop-filter: var(--_surface-blur);
   -webkit-backdrop-filter: var(--_surface-blur);
   color: var(--_text-primary);
+  gap: 3px;
+}
+
+.vjs-mode-skin .video-menu[data-open] {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  overflow: hidden;
 }
 
 .mode-menu-custom-section {
@@ -1582,26 +1589,97 @@ body.mode-theater-dimmed .mode-v10-player-host {
   color: var(--_accent-text);
 }
 
+.video-menu-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+}
+
+.video-menu-content[hidden],
+.video-menu-content:not([data-submenu])[data-child-open] {
+  display: none !important;
+}
+
+.video-menu-separator {
+  height: 1px;
+  width: 100%;
+  margin: 4px 0;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.vjs-mode-skin[data-mode="study"] .video-menu-separator {
+  background: rgba(17, 24, 39, 0.14);
+}
+
+.video-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
 .video-menu-item {
   width: 100%;
   height: auto;
   min-height: 34px;
   padding: 6px 10px;
   border-radius: var(--_button-radius, 10px);
+  display: flex;
+  align-items: center;
   justify-content: flex-start;
   gap: 8px;
   font-size: 0.78rem;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.video-menu-item:hover,
+.video-menu-item[data-highlighted],
+.video-menu-item:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+
+.vjs-mode-skin[data-mode="study"] .video-menu-item:hover,
+.vjs-mode-skin[data-mode="study"] .video-menu-item[data-highlighted],
+.vjs-mode-skin[data-mode="study"] .video-menu-item:focus-visible {
+  background: rgba(17, 24, 39, 0.08);
 }
 
 .video-menu-item .video-icon {
   display: block;
   width: 16px;
   height: 16px;
+  flex-shrink: 0;
 }
 
 .video-menu-item-label {
   flex: 1;
-  text-align: left;
+  text-align: start;
+}
+
+.media-menu-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: auto;
+  color: var(--_text-secondary);
+}
+
+.media-menu-back-chevron {
+  rotate: 180deg;
+}
+
+:dir(rtl) .media-menu-back-chevron {
+  rotate: 0deg;
+}
+
+:dir(rtl) .media-menu-forward-chevron {
+  scale: -1 1;
 }
 
 .video-menu-button-value {
@@ -1609,12 +1687,30 @@ body.mode-theater-dimmed .mode-v10-player-host {
   color: var(--_text-secondary);
 }
 
+.mode-menu-tier {
+  font-size: 0.62em;
+  font-weight: 800;
+  color: var(--_accent-color);
+  margin-left: 3px;
+  vertical-align: super;
+}
+
+.mode-menu-bitrate-badge {
+  font-family: var(--_mono-family);
+  font-size: 0.66rem;
+  color: var(--_text-secondary);
+  margin-inline-start: auto;
+  padding-inline-start: 6px;
+}
+
 .video-radio .video-radio-check {
   opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
 .video-radio[aria-checked="true"] .video-radio-check {
   opacity: 1;
+  color: var(--_accent-color);
 }
 
 .video-tooltip {
@@ -1942,7 +2038,7 @@ body.mode-theater-dimmed .mode-v10-player-host {
 @media (prefers-reduced-transparency: reduce) {
   .vjs-mode-skin:not([data-mode="skeleton"]) .video-controls-content,
   .vjs-mode-skin:not([data-mode="skeleton"]) .mode-top-bar,
-  .vjs-mode-skin:not([data-mode="skeleton"]) .video-menu-surface {
+  .vjs-mode-skin:not([data-mode="skeleton"]) .video-menu {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
