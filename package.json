@@ -1,0 +1,20 @@
+{
+  "name": "mode-videojs-skin",
+  "version": "1.0.0",
+  "description": "MODE — A Video.js v10 Skin for Every Occasion (Movie, Music, Study, Chill, Skeleton)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@videojs/html": "^10.3.0",
+    "hls.js": "^1.7.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}

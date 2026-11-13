@@ -1,0 +1,1957 @@
+/**
+ * @file mode-skin.css
+ * @version 1.0.0
+ * @description Complete stylesheet for "MODE — A Video.js v10 Skin for Every Occasion" (Apache-2.0).
+ * Implements 5 distinct occasion modes (Movie, Music, Study, Chill, Skeleton),
+ * activateable FX (data-fx="on|off"), Pin Controls (data-pinned="true|false"),
+ * @container responsive layout, and full accessibility media queries.
+ */
+
+/* ==========================================================================
+   1. BASE VIDEO.JS v10 CONTAINER & DESIGN TOKENS
+   ========================================================================== */
+.mode-v10-player-host {
+  display: block;
+  width: 100%;
+}
+
+.vjs-mode-skin {
+  /* Public Video.js v10 Custom Properties */
+  --_scale: var(--media-scale-unit, 4px);
+  --_font-family: var(--media-font-family, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  --_mono-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Default Mode Tokens (Overridden per data-mode) */
+  --_accent-color: var(--media-accent-color, #e5c158);
+  --_accent-text: var(--media-accent-text-color, #0c0612);
+  --_surface-bg: rgba(26, 8, 31, 0.84);
+  --_surface-border: rgba(229, 193, 88, 0.28);
+  --_surface-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --_surface-blur: blur(18px) saturate(1.35);
+  --_text-primary: #fdf8f5;
+  --_text-secondary: rgba(253, 248, 245, 0.72);
+  --_control-radius: var(--media-border-radius, 18px);
+  --_button-radius: 11px;
+  --_track-bg: rgba(255, 255, 255, 0.22);
+  --_buffer-bg: rgba(255, 255, 255, 0.38);
+
+  /* Live Edge Color Fallbacks (Updated at 15fps by EdgeColorEngine) */
+  --mode-edge-top: rgb(0, 240, 255);
+  --mode-edge-bottom: rgb(176, 38, 255);
+  --mode-edge-left: rgb(0, 210, 255);
+  --mode-edge-right: rgb(217, 70, 239);
+  --mode-edge-primary: rgb(176, 38, 255);
+  --mode-edge-secondary: rgb(0, 240, 255);
+
+  position: relative;
+  isolation: isolate;
+  container: mode-player / inline-size;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: #050509;
+  color: var(--_text-primary);
+  font-family: var(--_font-family);
+  border-radius: calc(var(--_control-radius) + 8px);
+  overflow: visible;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease;
+}
+
+.vjs-mode-skin ::slotted(video),
+.vjs-mode-skin video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  background: #000;
+}
+
+/* Deterministic Live Captions Overlay (Synced with Video.js v10 <media-captions-button> & TextTracks)
+   Suppresses browser-native WebVTT shadow overlay so captions never collide with the bottom control bar */
+.vjs-mode-skin video::-webkit-media-text-track-container,
+.vjs-mode-skin video::-webkit-media-text-track-display {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.mode-live-captions {
+  position: absolute;
+  left: 50%;
+  bottom: 72px;
+  transform: translateX(-50%);
+  z-index: 8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: min(88%, 740px);
+  width: max-content;
+  padding: 5px 13px;
+  border-radius: 8px;
+  background: rgba(8, 8, 16, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #f8fafc;
+  font-family: var(--_font-family);
+  font-size: clamp(0.8rem, 1.65vw, 0.96rem);
+  font-weight: 500;
+  line-height: 1.38;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+  pointer-events: none;
+  transition: bottom 0.22s ease-out, background 0.25s ease, border-color 0.25s ease;
+}
+
+/* Smoothly drop captions near the bottom edge when controls auto-hide on mouse leave */
+.vjs-mode-skin:not([data-pinned="true"]):not(:hover):not(:focus-within):not(:has(.video-controls[data-visible])) .mode-live-captions {
+  bottom: 14px;
+}
+
+/* In Study Mode (when Dual CC is toggled off), sit above the Study Ribbon */
+.vjs-mode-skin[data-mode="study"] .mode-live-captions {
+  bottom: 110px;
+}
+
+/* In Skeleton Mode, match the 75% transparent wireframe aesthetic */
+.vjs-mode-skin[data-mode="skeleton"] .mode-live-captions {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(0, 0, 0, 0.95);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28), 0 4px 12px rgba(0, 0, 0, 0.4);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 3px;
+}
+
+.vjs-mode-skin:fullscreen,
+.vjs-mode-skin:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+}
+
+/* ==========================================================================
+   2. THE 5 PRESET MODES OF `MODE`
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   MODE 1: MOVIE (Velvet Cinema — Deep Crimson, Royal Velvet Purple, Gold)
+   -------------------------------------------------------------------------- */
+.vjs-mode-skin[data-mode="movie"] {
+  --_accent-color: var(--media-accent-color, #e5c158);
+  --_accent-text: #18061c;
+  --_surface-bg: linear-gradient(135deg, rgba(42, 9, 36, 0.88) 0%, rgba(88, 14, 32, 0.85) 55%, rgba(26, 7, 32, 0.9) 100%);
+  --_surface-border: rgba(229, 193, 88, 0.34);
+  --_surface-shadow: 0 20px 50px rgba(10, 2, 14, 0.85), 0 0 28px rgba(122, 17, 40, 0.45), inset 0 1px 0 rgba(229, 193, 88, 0.25);
+  --_surface-blur: blur(20px) saturate(1.4);
+  --_text-primary: #fdf8f2;
+  --_text-secondary: rgba(253, 248, 242, 0.76);
+  --_control-radius: 20px;
+  --_button-radius: 13px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(229, 193, 88, 0.22);
+}
+
+.vjs-mode-skin[data-mode="movie"][data-fx="on"] .mode-ambient-halo {
+  opacity: 1;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(168, 24, 52, 0.45) 0%, transparent 65%),
+    radial-gradient(ellipse at 50% 100%, rgba(92, 18, 108, 0.52) 0%, transparent 70%),
+    radial-gradient(ellipse at 15% 50%, rgba(229, 193, 88, 0.18) 0%, transparent 55%);
+}
+
+.vjs-mode-skin[data-mode="movie"][data-fx="on"] .mode-film-grain {
+  opacity: 0.055;
+}
+
+.vjs-mode-skin[data-mode="movie"] .video-time-slider-fill {
+  background: linear-gradient(90deg, #9e1b34 0%, #d43f56 55%, #e5c158 100%);
+  box-shadow: 0 0 14px rgba(229, 193, 88, 0.55);
+}
+
+/* Theater Dimmer when toggled in Movie mode */
+body.mode-theater-dimmed::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 2, 8, 0.84);
+  z-index: 40;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+body.mode-theater-dimmed .mode-v10-player-host {
+  position: relative;
+  z-index: 50;
+}
+
+/* --------------------------------------------------------------------------
+   MODE 2: MUSIC (Arcane Cyber-Reactive — Edge Color Reflection + Frosted Glass)
+   -------------------------------------------------------------------------- */
+.vjs-mode-skin[data-mode="music"] {
+  --_accent-color: var(--media-accent-color, var(--mode-edge-secondary));
+  --_accent-text: #04050c;
+  --_surface-bg: linear-gradient(
+    135deg,
+    rgba(9, 10, 22, 0.72) 0%,
+    rgba(16, 12, 34, 0.68) 50%,
+    rgba(8, 14, 26, 0.74) 100%
+  );
+  --_surface-border: color-mix(in srgb, var(--mode-edge-secondary) 52%, rgba(176, 38, 255, 0.45));
+  --_surface-shadow:
+    0 16px 44px rgba(0, 0, 0, 0.78),
+    0 0 28px color-mix(in srgb, var(--mode-edge-primary) 38%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--mode-edge-secondary) 35%, rgba(255, 255, 255, 0.15));
+  --_surface-blur: blur(18px) saturate(1.65);
+  --_text-primary: #f0faff;
+  --_text-secondary: rgba(224, 242, 254, 0.78);
+  --_control-radius: 16px;
+  --_button-radius: 10px;
+  box-shadow:
+    0 -10px 38px -12px var(--mode-edge-top),
+    0 14px 42px -10px var(--mode-edge-bottom),
+    -12px 0 34px -12px var(--mode-edge-left),
+    12px 0 34px -12px var(--mode-edge-right),
+    0 0 0 1px color-mix(in srgb, var(--mode-edge-secondary) 45%, rgba(176, 38, 255, 0.4));
+}
+
+.vjs-mode-skin[data-mode="music"][data-fx="on"] .mode-ambient-halo {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 50% 0%, var(--mode-edge-top) 0%, transparent 58%),
+    radial-gradient(circle at 50% 100%, var(--mode-edge-bottom) 0%, transparent 62%),
+    radial-gradient(circle at 0% 50%, var(--mode-edge-left) 0%, transparent 55%),
+    radial-gradient(circle at 100% 50%, var(--mode-edge-right) 0%, transparent 55%);
+  filter: blur(36px);
+}
+
+.vjs-mode-skin[data-mode="music"] .video-time-slider-fill {
+  background: linear-gradient(90deg, var(--mode-edge-primary) 0%, var(--mode-edge-secondary) 100%);
+  box-shadow: 0 0 14px var(--mode-edge-secondary);
+}
+
+.vjs-mode-skin[data-mode="music"][data-fx="on"] .mode-music-viz-canvas,
+.vjs-mode-skin[data-mode="music"][data-fx="on"] .mode-music-spark-canvas {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   MODE 3: STUDY (Zen Focus & Polyglot — Pastel Alabaster & Slate Grey)
+   -------------------------------------------------------------------------- */
+.vjs-mode-skin[data-mode="study"] {
+  --_accent-color: var(--media-accent-color, #3b82f6);
+  --_accent-text: #ffffff;
+  --_surface-bg: rgba(244, 245, 248, 0.94);
+  --_surface-border: rgba(17, 24, 39, 0.14);
+  --_surface-shadow: 0 12px 32px rgba(15, 23, 42, 0.24), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  --_surface-blur: blur(16px);
+  --_text-primary: #111827;
+  --_text-secondary: #4b5563;
+  --_control-radius: 14px;
+  --_button-radius: 9px;
+  --_track-bg: rgba(17, 24, 39, 0.16);
+  --_buffer-bg: rgba(17, 24, 39, 0.28);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(229, 231, 235, 0.35);
+}
+
+.vjs-mode-skin[data-mode="study"] .video-time-slider-fill {
+  background: linear-gradient(90deg, #2563eb 0%, #4f46e5 100%);
+}
+
+.vjs-mode-skin[data-mode="study"] .media-button:hover {
+  background-color: rgba(17, 24, 39, 0.08);
+}
+
+.vjs-mode-skin[data-mode="study"] .media-button:active {
+  background-color: rgba(17, 24, 39, 0.14);
+}
+
+/* --------------------------------------------------------------------------
+   MODE 4: CHILL (Lo-Fi Sunset & Liquid Glass Pill-Island)
+   -------------------------------------------------------------------------- */
+.vjs-mode-skin[data-mode="chill"] {
+  --_accent-color: var(--media-accent-color, #ff9e64);
+  --_accent-text: #1e1024;
+  --_surface-bg: linear-gradient(
+    135deg,
+    rgba(43, 23, 56, 0.76) 0%,
+    rgba(68, 28, 62, 0.72) 52%,
+    rgba(34, 27, 64, 0.78) 100%
+  );
+  --_surface-border: rgba(255, 158, 100, 0.36);
+  --_surface-shadow: 0 18px 45px rgba(14, 6, 26, 0.72), 0 0 32px rgba(232, 121, 249, 0.22), inset 0 1px 0 rgba(255, 224, 180, 0.24);
+  --_surface-blur: blur(22px) saturate(1.5);
+  --_text-primary: #fff7ed;
+  --_text-secondary: rgba(255, 237, 213, 0.78);
+  --_control-radius: 16px;
+  --_button-radius: 9999px;
+  border-radius: 18px;
+  box-shadow: 0 24px 65px rgba(12, 5, 24, 0.75), 0 0 0 1px rgba(255, 158, 100, 0.24);
+}
+
+.vjs-mode-skin[data-mode="chill"] video {
+  border-radius: 18px;
+}
+
+.vjs-mode-skin[data-mode="chill"] .mode-top-bar {
+  border-radius: 9999px;
+}
+
+.vjs-mode-skin[data-mode="chill"] .video-controls {
+  align-items: center;
+}
+
+.vjs-mode-skin[data-mode="chill"] .video-controls-content {
+  width: min(94%, 820px);
+  padding-inline: 18px;
+  border-radius: 9999px;
+}
+
+.vjs-mode-skin[data-mode="chill"] .video-time-slider-fill {
+  background: linear-gradient(90deg, #ff9e64 0%, #e879f9 55%, #818cf8 100%);
+  box-shadow: 0 0 12px rgba(255, 158, 100, 0.5);
+}
+
+.vjs-mode-skin[data-mode="chill"][data-fx="on"] .mode-chill-bokeh-canvas {
+  opacity: 1;
+}
+
+.vjs-mode-skin[data-mode="chill"][data-fx="on"] .mode-ambient-halo {
+  opacity: 0.85;
+  background:
+    radial-gradient(ellipse at 30% 100%, rgba(255, 158, 100, 0.35) 0%, transparent 65%),
+    radial-gradient(ellipse at 70% 100%, rgba(232, 121, 249, 0.32) 0%, transparent 65%);
+}
+
+/* --------------------------------------------------------------------------
+   MODE 5: SKELETON (Base Wireframe — 75% Transparent with Crisp Black Outline)
+   -------------------------------------------------------------------------- */
+.vjs-mode-skin[data-mode="skeleton"] {
+  --_accent-color: var(--media-accent-color, #ffffff);
+  --_accent-text: #000000;
+  /* 75% Transparent = 0.25 alpha surface with crisp 1px black wireframe + inner white hairline for dark-video contrast */
+  --_surface-bg: rgba(0, 0, 0, 0.25);
+  --_surface-border: rgba(0, 0, 0, 0.95);
+  --_surface-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28), 0 2px 8px rgba(0, 0, 0, 0.35);
+  --_surface-blur: none;
+  --_text-primary: #ffffff;
+  --_text-secondary: rgba(255, 255, 255, 0.88);
+  --_control-radius: 3px;
+  --_button-radius: 2px;
+  --_track-bg: rgba(255, 255, 255, 0.28);
+  --_buffer-bg: rgba(255, 255, 255, 0.45);
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+.vjs-mode-skin[data-mode="skeleton"] .video-controls-content,
+.vjs-mode-skin[data-mode="skeleton"] .mode-top-bar,
+.vjs-mode-skin[data-mode="skeleton"] .video-menu-surface,
+.vjs-mode-skin[data-mode="skeleton"] .video-volume-popover-surface,
+.vjs-mode-skin[data-mode="skeleton"] .video-tooltip {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(0, 0, 0, 0.95);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28), 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.vjs-mode-skin[data-mode="skeleton"] .media-button,
+.vjs-mode-skin[data-mode="skeleton"] .video-time,
+.vjs-mode-skin[data-mode="skeleton"] .video-menu-surface,
+.vjs-mode-skin[data-mode="skeleton"] .mode-menu-toggle-row {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 4px rgba(0, 0, 0, 0.85);
+}
+
+.vjs-mode-skin[data-mode="skeleton"] .mode-seek-step-btn {
+  display: none;
+}
+
+/* ==========================================================================
+   3. AMBIENT HALO, FILM GRAIN, AND SLEEP VEIL OVERLAYS
+   ========================================================================== */
+.mode-ambient-halo {
+  position: absolute;
+  inset: -18px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(28px);
+  transition: opacity 0.5s ease, background 0.35s ease;
+}
+
+.mode-film-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: inherit;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 0);
+  background-size: 3px 3px;
+  mix-blend-mode: overlay;
+}
+
+.mode-chill-sleep-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: inherit;
+  background: #05020a;
+  opacity: var(--chill-sleep-dim, 0);
+  transition: opacity 0.8s ease;
+}
+
+/* ==========================================================================
+   4. MODE VISIBILITY HELPERS (Contextual Per-Mode UI Elements)
+   ========================================================================== */
+.mode-only-movie,
+.mode-only-music,
+.mode-only-study,
+.mode-only-chill,
+.mode-only-skeleton {
+  display: none !important;
+}
+
+.vjs-mode-skin[data-mode="movie"] .mode-only-movie:not([hidden]) {
+  display: inline-flex !important;
+}
+
+.vjs-mode-skin[data-mode="music"] .mode-only-music:not([hidden]) {
+  display: inline-flex !important;
+}
+
+.vjs-mode-skin[data-mode="study"] .mode-only-study:not([hidden]) {
+  display: flex !important;
+}
+
+.vjs-mode-skin[data-mode="chill"] .mode-only-chill:not([hidden]) {
+  display: inline-flex !important;
+}
+
+.vjs-mode-skin[data-mode="skeleton"][data-fx="on"] .mode-only-skeleton:not([hidden]) {
+  display: inline-flex !important;
+}
+
+.vjs-mode-skin [hidden],
+.vjs-mode-skin[data-mode] .mode-transcript-drawer[hidden],
+.vjs-mode-skin[data-transcript-open="false"] .mode-transcript-drawer {
+  display: none !important;
+}
+
+/* ==========================================================================
+   5. TOP CONTEXTUAL MODE BAR (Mode Switcher + FX + Pin Controls)
+   ========================================================================== */
+.mode-top-bar {
+  position: absolute;
+  top: calc(var(--_scale) * 3);
+  left: calc(var(--_scale) * 3);
+  right: calc(var(--_scale) * 3);
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--_control-radius);
+  background: var(--_surface-bg);
+  border: 1px solid var(--_surface-border);
+  box-shadow: var(--_surface-shadow);
+  backdrop-filter: var(--_surface-blur);
+  -webkit-backdrop-filter: var(--_surface-blur);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+}
+
+/* Auto-hide top bar with bottom controls on mouse-out UNLESS data-pinned="true" */
+.vjs-mode-skin:not([data-pinned="true"]):not(:hover):not(:focus-within):not(:has(.video-controls[data-visible])) .mode-top-bar {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  pointer-events: none;
+}
+
+.mode-top-left,
+.mode-top-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mode-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.26);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-family: var(--_mono-family);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--_text-primary);
+}
+
+.vjs-mode-skin[data-mode="study"] .mode-brand-badge {
+  background: rgba(17, 24, 39, 0.08);
+  border-color: rgba(17, 24, 39, 0.15);
+}
+
+.mode-brand-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--_accent-color);
+  box-shadow: 0 0 8px var(--_accent-color);
+}
+
+.mode-brand-version {
+  opacity: 0.65;
+  font-size: 0.6rem;
+}
+
+.mode-preset-pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.vjs-mode-skin[data-mode="study"] .mode-preset-pills {
+  background: rgba(17, 24, 39, 0.07);
+}
+
+.mode-pill-btn {
+   appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--_text-secondary);
+  font-family: var(--_font-family);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  min-height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.mode-pill-btn:hover {
+  color: var(--_text-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mode-pill-btn.is-active {
+  background: var(--_accent-color);
+  color: var(--_accent-text);
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+}
+
+.mode-pill-btn:focus-visible,
+.mode-chip-btn:focus-visible,
+.mode-study-btn:focus-visible,
+.mode-study-select:focus-visible,
+.mode-sleep-btn:focus-visible {
+  outline: 2px solid var(--_accent-color);
+  outline-offset: 2px;
+}
+
+.mode-chip-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.24);
+  color: var(--_text-primary);
+  font-family: var(--_font-family);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 9px;
+  min-height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.vjs-mode-skin[data-mode="study"] .mode-chip-btn {
+  background: rgba(17, 24, 39, 0.06);
+  border-color: rgba(17, 24, 39, 0.16);
+}
+
+.mode-chip-btn.is-active {
+  border-color: var(--_accent-color);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--_accent-color) 35%, transparent);
+}
+
+.mode-fx-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6b7280;
+}
+
+.mode-chip-btn.is-active .mode-fx-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+/* Music Mode Edge Color Telemetry Swatches */
+.mode-edge-telemetry {
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-family: var(--_mono-family);
+  font-size: 0.62rem;
+}
+
+.mode-edge-label {
+  opacity: 0.75;
+  margin-right: 2px;
+}
+
+.mode-edge-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  display: inline-block;
+  transition: background-color 0.12s linear;
+}
+
+/* Chill Mode Sleep Timer Pills */
+.mode-chill-timer-group {
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 158, 100, 0.28);
+  font-size: 0.68rem;
+}
+
+.mode-chill-timer-label {
+  opacity: 0.85;
+  margin-right: 2px;
+}
+
+.mode-sleep-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--_text-secondary);
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.mode-sleep-btn.is-active {
+  background: var(--_accent-color);
+  color: var(--_accent-text);
+}
+
+.mode-sleep-readout {
+  font-family: var(--_mono-family);
+  font-size: 0.66rem;
+  color: #fde047;
+  margin-left: 4px;
+}
+
+/* Skeleton SMPTE Badge */
+.mode-smpte-badge {
+  padding: 3px 8px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-family: var(--_mono-family);
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+
+/* ==========================================================================
+   6. STUDY MODE: POLYGLOT RIBBON, DUAL-CAPTIONS & TRANSCRIPT DRAWER
+   ========================================================================== */
+.mode-study-ribbon {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 12px;
+  margin-bottom: 6px;
+  border-radius: 12px;
+  background: var(--_surface-bg);
+  border: 1px solid var(--_surface-border);
+  box-shadow: var(--_surface-shadow);
+  backdrop-filter: var(--_surface-blur);
+  font-size: 0.72rem;
+  color: var(--_text-primary);
+  pointer-events: auto;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.vjs-mode-skin:not([data-pinned="true"]):not(:hover):not(:focus-within):not(:has(.video-controls[data-visible])) .mode-study-ribbon {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+
+.mode-study-group {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mode-study-label {
+  font-weight: 600;
+  color: var(--_text-secondary);
+  font-size: 0.7rem;
+}
+
+.mode-study-select {
+  appearance: auto;
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid rgba(17, 24, 39, 0.22);
+  border-radius: 7px;
+  padding: 3px 7px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mode-study-btn {
+  appearance: none;
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid rgba(17, 24, 39, 0.2);
+  border-radius: 7px;
+  padding: 3px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mode-study-btn:hover {
+  background: #e5e7eb;
+}
+
+.mode-study-btn.is-active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #1d4ed8;
+}
+
+/* Live Dual-Caption Overlay in Study Mode */
+.mode-dual-captions {
+  position: absolute;
+  left: 50%;
+  bottom: 110px;
+  transform: translateX(-50%);
+  z-index: 8;
+  width: min(88%, 680px);
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  text-align: center;
+  pointer-events: none;
+  transition: bottom 0.22s ease-out, left 0.22s ease-out, right 0.22s ease-out, width 0.22s ease-out;
+}
+
+/* Prevent collision when the in-player Polyglot Transcript Drawer is open */
+.vjs-mode-skin[data-transcript-open="true"] .mode-dual-captions {
+  left: 16px;
+  right: 374px;
+  width: auto;
+  max-width: calc(100% - 390px);
+  transform: none;
+}
+
+@container mode-player (max-width: 720px) {
+  .vjs-mode-skin[data-transcript-open="true"] .mode-dual-captions {
+    left: 50%;
+    right: auto;
+    width: 92%;
+    max-width: 92%;
+    transform: translateX(-50%);
+  }
+}
+
+.vjs-mode-skin:not([data-pinned="true"]):not(:hover):not(:focus-within):not(:has(.video-controls[data-visible])) .mode-dual-captions {
+  bottom: 14px;
+}
+
+.mode-dual-caption-primary {
+  color: #f8fafc;
+  font-size: clamp(0.78rem, 1.6vw, 0.94rem);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.mode-dual-caption-translated {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #93c5fd;
+  font-size: clamp(0.74rem, 1.45vw, 0.86rem);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.mode-lang-pill {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.35);
+  border: 1px solid rgba(147, 197, 253, 0.5);
+  color: #eff6ff;
+  font-family: var(--_mono-family);
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+/* Interactive Searchable Transcript & Bookmarks Drawer */
+.mode-transcript-drawer {
+  position: absolute;
+  top: 54px;
+  right: 12px;
+  bottom: 115px;
+  width: min(350px, 88%);
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: rgba(249, 250, 251, 0.97);
+  color: #111827;
+  border: 1px solid rgba(17, 24, 39, 0.18);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+
+.mode-transcript-drawer[hidden] {
+  display: none !important;
+}
+
+.mode-transcript-header {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mode-transcript-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.76rem;
+}
+
+.mode-transcript-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mode-transcript-popout-btn {
+  appearance: none;
+  border: 1px solid rgba(37, 99, 235, 0.28);
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  transition: all 0.15s ease;
+}
+
+.mode-transcript-popout-btn:hover {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #1d4ed8;
+}
+
+.mode-transcript-close-btn {
+  appearance: none;
+  border: none;
+  background: rgba(17, 24, 39, 0.08);
+  color: #111827;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.mode-transcript-close-btn:hover {
+  background: rgba(17, 24, 39, 0.16);
+}
+
+.mode-transcript-search-input {
+  width: 100%;
+  padding: 5px 9px;
+  border-radius: 7px;
+  border: 1px solid rgba(17, 24, 39, 0.2);
+  background: #ffffff;
+  color: #111827;
+  font-size: 0.72rem;
+}
+
+.mode-transcript-cues {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mode-transcript-cue-item {
+  appearance: none;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.75);
+  color: #111827;
+  text-align: left;
+  padding: 6px 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mode-transcript-cue-item:hover {
+  background: #eff6ff;
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.mode-transcript-cue-item.is-active {
+  background: #dbeafe;
+  border-color: #2563eb;
+}
+
+.mode-cue-time {
+  font-family: var(--_mono-family);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #2563eb;
+  padding-top: 2px;
+}
+
+.mode-cue-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.7rem;
+}
+
+.mode-cue-en {
+  font-weight: 600;
+  color: #111827;
+}
+
+.mode-cue-tr {
+  color: #4b5563;
+  font-size: 0.66rem;
+}
+
+.mode-bookmarks-section {
+  padding: 8px 10px;
+  border-top: 1px solid rgba(17, 24, 39, 0.12);
+  background: rgba(243, 244, 246, 0.9);
+}
+
+.mode-bookmarks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.mode-mini-action-btn {
+  appearance: none;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.mode-bookmarks-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-height: 64px;
+  overflow-y: auto;
+}
+
+.mode-bookmark-chip {
+  display: inline-flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid rgba(17, 24, 39, 0.18);
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 0.65rem;
+}
+
+.mode-bookmark-jump {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: #111827;
+  padding: 2px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.mode-bm-time {
+  font-family: var(--_mono-family);
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.mode-bookmark-del {
+  appearance: none;
+  border: none;
+  border-left: 1px solid rgba(17, 24, 39, 0.12);
+  background: transparent;
+  color: #6b7280;
+  padding: 2px 5px;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   7. MAIN VIDEO.JS v10 CONTROL BAR & SURFACE
+   ========================================================================== */
+.video-controls {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 10;
+  padding: calc(var(--_scale) * 3);
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+
+.video-controls-content {
+  position: relative;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--_scale) * 1.25);
+  width: 100%;
+  padding: calc(var(--_scale) * 1.5) calc(var(--_scale) * 2.5);
+  border-radius: var(--_control-radius);
+  background: var(--_surface-bg);
+  border: 1px solid var(--_surface-border);
+  box-shadow: var(--_surface-shadow);
+  backdrop-filter: var(--_surface-blur);
+  -webkit-backdrop-filter: var(--_surface-blur);
+  color: var(--_text-primary);
+  transition:
+    opacity 0.22s ease-out,
+    transform 0.22s ease-out,
+    visibility 0.22s ease-out,
+    background 0.35s ease,
+    border-color 0.35s ease,
+    border-radius 0.35s ease;
+}
+
+/* Hover-only visibility UNLESS data-pinned="true" ("Always Visible Controls") */
+.vjs-mode-skin:not([data-pinned="true"]):not(:hover):not(:focus-within):not(:has(.video-controls[data-visible])) .video-controls-content {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.985);
+  pointer-events: none;
+}
+
+/* When hovered, focused, active on touch, or data-pinned="true", controls are visible */
+.vjs-mode-skin[data-pinned="true"] .video-controls-content,
+.vjs-mode-skin[data-pinned="true"] .mode-top-bar,
+.vjs-mode-skin[data-pinned="true"] .mode-study-ribbon {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) scale(1) !important;
+  pointer-events: auto !important;
+}
+
+/* Embedded Canvases inside Control Bar (Music & Chill Modes) */
+.mode-music-viz-canvas,
+.mode-chill-bokeh-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.mode-music-spark-canvas {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: calc(100% + 20px);
+  height: calc(100% + 20px);
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.video-controls-content > media-tooltip-group {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--_scale) * 1.25);
+  width: 100%;
+}
+
+/* ==========================================================================
+   8. BUTTONS, ICONS & OPTICAL ALIGNMENT
+   ========================================================================== */
+.media-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: var(--_button-radius);
+  background: transparent;
+  color: var(--_text-primary);
+  cursor: pointer;
+  outline-offset: 2px;
+  transition: background-color 0.15s ease, transform 0.15s ease, color 0.15s ease;
+}
+
+.media-button:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.media-button:active {
+  transform: scale(0.94);
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.media-button:focus-visible {
+  outline: 2px solid var(--_accent-color);
+  outline-offset: 2px;
+}
+
+.video-icon {
+  width: 20px;
+  height: 20px;
+  display: none;
+  pointer-events: none;
+}
+
+/* Optical Play Icon Alignment (Shifts triangle 1.5px right so visual centroid matches button center) */
+.video-play-icon {
+  translate: 1.5px 0;
+}
+
+/* Play / Pause / Restart state visibility */
+.video-play-button:not([data-paused]):not([data-ended]) .video-pause-icon,
+.video-play-button[data-paused]:not([data-ended]) .video-play-icon,
+.video-play-button[data-ended] .video-restart-icon {
+  display: block;
+}
+
+.video-seek-button .video-seek-icon {
+  display: block;
+}
+
+/* Volume icon state visibility */
+.video-mute-button[data-muted] .video-volume-off-icon,
+.video-mute-button[data-volume-level="off"] .video-volume-off-icon,
+.video-mute-button[data-volume-level="low"]:not([data-muted]) .video-volume-low-icon,
+.video-mute-button[data-volume-level="medium"]:not([data-muted]) .video-volume-high-icon,
+.video-mute-button[data-volume-level="high"]:not([data-muted]) .video-volume-high-icon,
+.video-mute-button:not([data-muted]):not([data-volume-level]) .video-volume-high-icon {
+  display: block;
+}
+
+/* Captions icon state visibility */
+.video-captions-button:not([data-active]) .video-captions-off-icon,
+.video-captions-button[data-active] .video-captions-on-icon {
+  display: block;
+}
+
+/* Settings gear rotation on open */
+.video-settings-button .video-settings-icon {
+  display: block;
+  transition: rotate 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.video-settings-button[aria-expanded="true"] .video-settings-icon {
+  rotate: 40deg;
+}
+
+/* PiP & Fullscreen icon state visibility */
+.video-pip-button:not([data-pip]) .video-pip-enter-icon,
+.video-pip-button[data-pip] .video-pip-exit-icon,
+.video-fullscreen-button:not([data-fullscreen]) .video-fullscreen-enter-icon,
+.video-fullscreen-button[data-fullscreen] .video-fullscreen-exit-icon {
+  display: block;
+}
+
+.video-button-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* ==========================================================================
+   9. TIME DISPLAY (TABULAR NUMS)
+   ========================================================================== */
+.video-time-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-inline: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.video-time[type="current"] {
+  color: var(--_text-primary);
+}
+
+.video-time-separator,
+.video-time[type="duration"] {
+  color: var(--_text-secondary);
+}
+
+/* ==========================================================================
+   10. TIME SLIDER, CHAPTERS, A-B LOOP BAR & THUMBNAIL PREVIEW
+   ========================================================================== */
+.media-slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 36px;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.video-time-slider {
+  margin-inline: 8px;
+}
+
+.video-time-slider-chapters {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  gap: 3px;
+}
+
+.video-time-slider-chapter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex-grow: 1;
+}
+
+.media-slider-track {
+  position: relative;
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--_track-bg);
+  overflow: hidden;
+  transition: height 0.15s ease;
+}
+
+.video-time-slider:hover .media-slider-track,
+.video-time-slider[data-dragging] .media-slider-track {
+  height: 8px;
+}
+
+.media-slider-buffer {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: var(--media-slider-buffer, 0%);
+  background: var(--_buffer-bg);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.media-slider-fill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: var(--media-slider-fill, 0%);
+  background: var(--_accent-color);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Study Mode A-B Loop Range Highlight on Timeline */
+.mode-ab-loop-bar {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: var(--study-loop-a, 0%);
+  width: var(--study-loop-width, 0%);
+  height: 11px;
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.38);
+  border-inline: 2px solid #2563eb;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.vjs-mode-skin[data-ab-loop="active"] .mode-ab-loop-bar {
+  opacity: 1;
+}
+
+.vjs-mode-skin[data-ab-loop="point-a"] .mode-ab-loop-bar {
+  opacity: 1;
+  width: 3px;
+  background: #2563eb;
+}
+
+.media-slider-thumb {
+  position: absolute;
+  left: var(--media-slider-fill, 0%);
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--_text-primary);
+  border: 2px solid var(--_accent-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+  translate: -50% -50%;
+  scale: 0;
+  transition: scale 0.15s ease;
+  pointer-events: none;
+}
+
+.media-slider:hover .media-slider-thumb,
+.media-slider[data-dragging] .media-slider-thumb,
+.media-slider:focus-visible .media-slider-thumb {
+  scale: 1;
+}
+
+.media-slider:focus-visible {
+  outline: 2px solid var(--_accent-color);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Time Slider Hover Preview & Storyboard Thumbnail */
+.video-time-slider-preview {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.video-time-slider[data-pointing] .video-time-slider-preview,
+.video-time-slider[data-dragging] .video-time-slider-preview {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.video-time-slider-preview-surface {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 10px;
+  background: var(--_surface-bg);
+  border: 1px solid var(--_surface-border);
+  box-shadow: var(--_surface-shadow);
+  backdrop-filter: var(--_surface-blur);
+}
+
+.video-time-slider-thumbnail {
+  display: block;
+  max-width: 156px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.video-time-slider-value {
+  font-family: var(--_mono-family);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  padding-inline: 6px;
+  color: var(--_text-primary);
+}
+
+/* ==========================================================================
+   11. VOLUME POPOVER, SETTINGS MENU & TOOLTIPS
+   ========================================================================== */
+.vjs-mode-skin [popover],
+.video-volume-popover,
+.video-menu,
+.video-tooltip {
+  z-index: 30;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0;
+  outline: none;
+  overflow: visible;
+  color: inherit;
+}
+
+.video-volume-popover:not([data-open]),
+.video-menu:not([data-open]),
+.video-tooltip:not([data-open]) {
+  display: none;
+}
+
+.video-volume-popover-surface {
+  padding: 12px 10px;
+  border-radius: var(--_control-radius, 18px);
+  background: var(--_surface-bg);
+  border: 1px solid var(--_surface-border);
+  box-shadow: var(--_surface-shadow);
+  backdrop-filter: var(--_surface-blur);
+  -webkit-backdrop-filter: var(--_surface-blur);
+  overflow: hidden;
+}
+
+.video-volume-slider {
+  width: 24px;
+  height: 88px;
+  flex-direction: column;
+}
+
+.video-volume-slider .media-slider-track {
+  width: 6px;
+  height: 100%;
+}
+
+.video-volume-slider .media-slider-fill {
+  top: auto;
+  bottom: 0;
+  width: 100%;
+  height: var(--media-slider-fill, 100%);
+}
+
+.video-volume-slider .media-slider-thumb {
+  left: 50%;
+  top: calc(100% - var(--media-slider-fill, 100%));
+  scale: 1;
+}
+
+.video-menu-surface {
+  min-width: 236px;
+  padding: 8px;
+  border-radius: var(--_control-radius, 18px);
+  background: var(--_surface-bg);
+  border: 1px solid var(--_surface-border);
+  box-shadow: var(--_surface-shadow);
+  backdrop-filter: var(--_surface-blur);
+  -webkit-backdrop-filter: var(--_surface-blur);
+  color: var(--_text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.mode-menu-custom-section {
+  padding: 4px 4px 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.vjs-mode-skin[data-mode="study"] .mode-menu-custom-section {
+  border-bottom-color: rgba(17, 24, 39, 0.12);
+}
+
+.mode-menu-section-heading {
+  font-family: var(--_mono-family);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  opacity: 0.65;
+  padding: 2px 6px;
+}
+
+.mode-menu-toggle-row {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--_text-primary);
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: var(--_button-radius, 10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mode-menu-toggle-row:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.vjs-mode-skin[data-mode="study"] .mode-menu-toggle-row:hover {
+  background: rgba(17, 24, 39, 0.08);
+}
+
+.mode-menu-pill {
+  font-family: var(--_mono-family);
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.mode-menu-pill.is-on {
+  background: var(--_accent-color);
+  color: var(--_accent-text);
+}
+
+.video-menu-item {
+  width: 100%;
+  height: auto;
+  min-height: 34px;
+  padding: 6px 10px;
+  border-radius: var(--_button-radius, 10px);
+  justify-content: flex-start;
+  gap: 8px;
+  font-size: 0.78rem;
+}
+
+.video-menu-item .video-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.video-menu-item-label {
+  flex: 1;
+  text-align: left;
+}
+
+.video-menu-button-value {
+  font-size: 0.72rem;
+  color: var(--_text-secondary);
+}
+
+.video-radio .video-radio-check {
+  opacity: 0;
+}
+
+.video-radio[aria-checked="true"] .video-radio-check {
+  opacity: 1;
+}
+
+.video-tooltip {
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: var(--_surface-bg);
+  border: 1px solid var(--_surface-border);
+  box-shadow: var(--_surface-shadow);
+  backdrop-filter: var(--_surface-blur);
+  color: var(--_text-primary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   12. POSTER, BUFFERING INDICATOR & ERROR DIALOG
+   ========================================================================== */
+.video-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.video-poster:not([data-visible]) {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.video-buffering-indicator {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.video-buffering-indicator[data-visible] {
+  display: flex;
+}
+
+.video-buffering-indicator-surface {
+  padding: 14px;
+  border-radius: 50%;
+  background: var(--_surface-bg);
+  border: 1px solid var(--_surface-border);
+  backdrop-filter: var(--_surface-blur);
+}
+
+.video-buffering-indicator .video-icon {
+  display: block;
+  width: 28px;
+  height: 28px;
+  animation: modeSpin 0.9s linear infinite;
+}
+
+@keyframes modeSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.video-error-dialog:not([data-open]) {
+  display: none;
+}
+
+.video-error-dialog {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.72);
+  padding: 20px;
+}
+
+.video-error-dialog-surface {
+  max-width: 360px;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--_surface-bg);
+  border: 1px solid var(--_surface-border);
+  color: var(--_text-primary);
+}
+
+/* ==========================================================================
+   13. ACCESSIBILITY MEDIA QUERIES & RESPONSIVE @CONTAINER QUERIES
+   ========================================================================== */
+
+/* Comfortable 44x44px Thumb Targets on Larger Touch Devices */
+@media (pointer: coarse) {
+  .media-button {
+    min-width: 42px;
+    min-height: 42px;
+  }
+
+  .media-slider {
+    min-height: 38px;
+  }
+
+  .mode-pill-btn,
+  .mode-chip-btn {
+    min-height: 34px;
+    padding-inline: 10px;
+  }
+}
+
+@media (max-width: 560px) {
+  .vjs-mode-skin:not(:fullscreen) {
+    aspect-ratio: 16 / 10;
+    min-height: 236px;
+    border-radius: 16px;
+  }
+}
+
+@container mode-player (max-width: 680px) {
+  .mode-seek-step-btn,
+  .mode-edge-telemetry,
+  .mode-chill-timer-group,
+  .mode-smpte-badge {
+    display: none !important;
+  }
+
+  .mode-pill-btn span:not(.mode-pill-icon) {
+    display: none;
+  }
+
+  .mode-pill-btn {
+    padding: 4px 8px;
+  }
+
+  .mode-study-ribbon {
+    font-size: 0.66rem;
+    padding: 4px 8px;
+  }
+}
+
+/* Compact Mobile Portrait Player Layout (<= 560px container width) */
+@container mode-player (max-width: 560px) {
+  .mode-brand-badge,
+  .mode-only-movie,
+  .video-pip-button,
+  .mode-study-label {
+    display: none !important;
+  }
+
+  /* Single-row compact top bar that never wraps or covers the video */
+  .mode-top-bar {
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    padding: 3px 6px;
+    gap: 4px;
+    flex-wrap: nowrap;
+    border-radius: 12px;
+  }
+
+  .mode-top-left,
+  .mode-top-right {
+    gap: 3px;
+    flex-wrap: nowrap;
+  }
+
+  .mode-preset-pills {
+    padding: 2px;
+    gap: 2px;
+  }
+
+  .mode-pill-btn {
+    min-height: 26px !important;
+    height: 26px;
+    width: 28px;
+    padding: 0 !important;
+    justify-content: center;
+    border-radius: 7px;
+  }
+
+  .mode-pill-icon {
+    font-size: 0.82rem;
+  }
+
+  .mode-chip-btn {
+    min-height: 26px !important;
+    height: 26px;
+    padding: 0 7px !important;
+    font-size: 0.64rem;
+    gap: 3px;
+    white-space: nowrap;
+  }
+
+  /* On ultra-narrow portrait screens, keep top-right chips compact so they never overflow */
+  .mode-top-right .mode-chip-btn span:not(.mode-fx-dot):not([id$="-fx-label"]) {
+    font-size: 0.62rem;
+  }
+
+  /* Compact two-row bottom control bar with full-width scrubbing timeline on top */
+  .video-controls {
+    padding: 6px;
+  }
+
+  .video-controls-content,
+  .vjs-mode-skin[data-mode="chill"] .video-controls-content {
+    width: 100%;
+    padding: 4px 8px;
+    border-radius: 12px;
+  }
+
+  .video-controls-content > media-tooltip-group {
+    flex-wrap: wrap;
+    row-gap: 1px;
+    column-gap: 2px;
+    justify-content: space-between;
+  }
+
+  .video-time-slider {
+    order: -1;
+    flex: 0 0 100%;
+    width: 100%;
+    min-height: 20px !important;
+    height: 20px;
+    margin-inline: 0;
+  }
+
+  .media-button {
+    min-width: 34px !important;
+    min-height: 34px !important;
+    width: 34px;
+    height: 34px;
+  }
+
+  .video-icon {
+    width: 17px;
+    height: 17px;
+  }
+
+  .video-time-group {
+    font-size: 0.68rem;
+    padding-inline: 4px;
+    margin-right: auto;
+  }
+
+  /* Proportionate mobile captions & study ribbon */
+  .mode-live-captions {
+    bottom: 68px;
+    max-width: 94%;
+    padding: 3px 9px;
+    font-size: 0.72rem;
+  }
+
+  .mode-dual-captions {
+    bottom: 96px;
+    width: 94%;
+    padding: 5px 9px;
+    gap: 2px;
+  }
+
+  .mode-dual-caption-primary {
+    font-size: 0.72rem;
+  }
+
+  .mode-dual-caption-translated {
+    font-size: 0.68rem;
+  }
+
+  .mode-study-ribbon {
+    left: 6px;
+    right: 6px;
+    bottom: 66px;
+    padding: 3px 6px;
+    gap: 4px;
+    border-radius: 9px;
+  }
+
+  .mode-study-select,
+  .mode-study-btn {
+    padding: 2px 5px;
+    font-size: 0.62rem;
+  }
+
+  .mode-transcript-drawer {
+    top: 44px;
+    left: 6px;
+    right: 6px;
+    bottom: 66px;
+    width: auto;
+  }
+}
+
+@container mode-player (max-width: 420px) {
+  .mode-top-right button[id$="-pin-btn"] span:last-child,
+  .mode-top-right button[id$="-transcript-toggle-btn"] span:last-child {
+    display: none;
+  }
+}
+
+/* Calm on Request: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .vjs-mode-skin,
+  .vjs-mode-skin *,
+  .vjs-mode-skin *::before,
+  .vjs-mode-skin *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .mode-music-viz-canvas,
+  .mode-music-spark-canvas,
+  .mode-chill-bokeh-canvas,
+  .mode-film-grain {
+    display: none !important;
+  }
+}
+
+/* Respect prefers-reduced-transparency without destroying mode themes */
+@media (prefers-reduced-transparency: reduce) {
+  .vjs-mode-skin:not([data-mode="skeleton"]) .video-controls-content,
+  .vjs-mode-skin:not([data-mode="skeleton"]) .mode-top-bar,
+  .vjs-mode-skin:not([data-mode="skeleton"]) .video-menu-surface {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Respect prefers-contrast: more while preserving each mode's distinctive palette */
+@media (prefers-contrast: more) {
+  .vjs-mode-skin .video-controls-content,
+  .vjs-mode-skin .mode-top-bar {
+    border-width: 1.5px;
+  }
+}

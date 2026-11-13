@@ -1,0 +1,911 @@
+/**
+ * @file workbench.css
+ * @version 1.0.0
+ * @description Styling for the MODE Judge's Workbench & Interactive Showcase (https://arcanedoma.in/mode/).
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: #06060c;
+  background-image:
+    radial-gradient(circle at 18% 0%, rgba(176, 38, 255, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 82% 10%, rgba(0, 240, 255, 0.1) 0%, transparent 45%);
+  color: #f3f4f6;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wb-page {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.wb-container {
+  width: min(1220px, 100% - 24px);
+  margin-inline: auto;
+}
+
+/* Header */
+.wb-header {
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  background: rgba(6, 6, 12, 0.82);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+.wb-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-block: 12px;
+}
+
+.wb-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wb-favicon-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: block;
+}
+
+.wb-logo-link {
+  text-decoration: none;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+
+.wb-logo-mark span {
+  color: #00f0ff;
+}
+
+.wb-divider {
+  opacity: 0.3;
+}
+
+.wb-project-name {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wb-badge-v10 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 240, 255, 0.14);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  color: #00f0ff;
+}
+
+.wb-header-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wb-pill-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.wb-pill-license {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #d1d5db;
+}
+
+.wb-pill-live {
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #6ee7b7;
+  transition: all 0.2s ease;
+}
+
+.wb-pill-live:hover {
+  background: rgba(16, 185, 129, 0.25);
+  color: #ffffff;
+}
+
+.wb-nav-link {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.wb-nav-link:hover {
+  color: #ffffff;
+}
+
+/* Hero */
+.wb-hero {
+  text-align: center;
+  padding: 32px 0 22px;
+  max-width: 860px;
+  margin-inline: auto;
+}
+
+.wb-hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #00f0ff;
+  margin-bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wb-hero-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.85rem, 4vw, 2.85rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+  line-height: 1.15;
+}
+
+.wb-gradient-text {
+  background: linear-gradient(135deg, #00f0ff 0%, #b026ff 52%, #e5c158 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.wb-hero-subtitle {
+  color: #9ca3af;
+  font-size: clamp(0.92rem, 1.5vw, 1.05rem);
+  margin: 0;
+}
+
+.wb-hero-subtitle strong,
+.wb-hero-subtitle em {
+  color: #f3f4f6;
+}
+
+/* 5 Mode Cards Deck */
+.wb-mode-deck {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 980px) {
+  .wb-mode-deck {
+    grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+  }
+}
+
+.wb-mode-card {
+  appearance: none;
+  text-align: left;
+  padding: 13px 14px;
+  border-radius: 14px;
+  background: rgba(17, 19, 32, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.wb-mode-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(26, 29, 48, 0.85);
+}
+
+.wb-mode-card.is-active {
+  border-color: #00f0ff;
+  background: linear-gradient(145deg, rgba(176, 38, 255, 0.16), rgba(0, 240, 255, 0.1));
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 240, 255, 0.35);
+}
+
+.wb-mode-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wb-mode-icon {
+  font-size: 1.25rem;
+}
+
+.wb-mode-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #9ca3af;
+}
+
+.wb-mode-card h3 {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.wb-mode-card p {
+  margin: 0;
+  font-size: 0.74rem;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.wb-mode-card code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: #93c5fd;
+}
+
+/* Workbench Toolbar */
+.wb-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(15, 17, 28, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 22px;
+}
+
+.wb-toolbar-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.wb-toolbar-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #d1d5db;
+}
+
+.wb-select {
+  background: #090a12;
+  color: #f9fafb;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wb-size-pills {
+  display: inline-flex;
+  background: #090a12;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.wb-size-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.wb-size-btn.is-active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.wb-range-slider {
+  width: 95px;
+  accent-color: #00f0ff;
+  cursor: pointer;
+}
+
+.wb-mono-readout {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #00f0ff;
+  min-width: 44px;
+}
+
+.wb-action-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #090a12;
+  color: #f3f4f6;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 6px 11px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.wb-action-btn.is-on {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.14);
+  color: #a7f3d0;
+}
+
+.wb-color-picker-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 8px;
+  background: #090a12;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wb-color-picker-wrap input[type="color"] {
+  width: 20px;
+  height: 20px;
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Player Stage */
+.wb-stage-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 0 24px;
+}
+
+.wb-player-resizable {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: auto;
+  transition: width 0.18s ease;
+}
+
+/* Telemetry Bar */
+.wb-telemetry-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(13, 15, 26, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 18px;
+}
+
+.wb-telemetry-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.wb-tel-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: #9ca3af;
+}
+
+.wb-tel-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: #00f0ff;
+}
+
+.wb-tel-swatches {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wb-tel-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: #00f0ff;
+}
+
+.wb-mux-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wb-mux-row code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  padding: 2px 6px;
+  border-radius: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 210px;
+}
+
+.wb-mini-copy-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.wb-mini-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Mux Custom Loader */
+.wb-mux-custom-loader {
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(176, 38, 255, 0.08));
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  margin-bottom: 14px;
+}
+
+.wb-hotkey-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(13, 15, 26, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 36px;
+  font-size: 0.74rem;
+}
+
+.wb-hotkey-title {
+  font-weight: 700;
+  color: #e5e7eb;
+  white-space: nowrap;
+}
+
+.wb-hotkey-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #9ca3af;
+}
+
+.wb-hotkey-chips span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.wb-hotkey-chips kbd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #00f0ff;
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid rgba(0, 240, 255, 0.28);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.wb-mux-loader-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.wb-mux-loader-inner strong {
+  font-size: 0.88rem;
+  color: #fde68a;
+}
+
+.wb-mux-loader-inner p {
+  margin: 2px 0 0;
+  font-size: 0.76rem;
+  color: #d1d5db;
+}
+
+.wb-mux-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 280px;
+  max-width: 520px;
+}
+
+.wb-mux-input {
+  flex: 1;
+  padding: 7px 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #070810;
+  color: #ffffff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+}
+
+.wb-mux-load-btn {
+  appearance: none;
+  border: none;
+  background: #f59e0b;
+  color: #090a10;
+  font-weight: 700;
+  font-size: 0.76rem;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Docs & Audit Sections */
+.wb-docs-section {
+  padding-block: 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.wb-section-header {
+  margin-bottom: 18px;
+}
+
+.wb-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #b026ff;
+}
+
+.wb-section-header h2 {
+  margin: 4px 0 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.65rem;
+}
+
+.wb-quote-card {
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: rgba(18, 20, 34, 0.85);
+  border: 1px solid rgba(176, 38, 255, 0.35);
+  margin-bottom: 20px;
+}
+
+.wb-quote-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #c084fc;
+}
+
+.wb-quote-card p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #e5e7eb;
+  line-height: 1.65;
+}
+
+.wb-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.wb-doc-card {
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(15, 17, 28, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.wb-doc-card h3 {
+  margin: 0 0 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  color: #00f0ff;
+}
+
+.wb-doc-card p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #d1d5db;
+}
+
+.wb-audit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.wb-audit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(15, 17, 28, 0.75);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.wb-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.wb-audit-item strong {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+  color: #ffffff;
+}
+
+.wb-audit-item p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+.wb-footer {
+  margin-top: 40px;
+  padding-block: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.wb-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.wb-footer a {
+  color: #00f0ff;
+  text-decoration: none;
+}
+
+.wb-footer a:hover {
+  text-decoration: underline;
+}
+
+.wb-footer-credits {
+  font-size: 0.78rem;
+  color: #a1a1aa;
+}
+
+/* ==========================================================================
+   MOBILE PORTRAIT & SMALL TABLET OPTIMIZATIONS (<= 680px)
+   ========================================================================== */
+@media (max-width: 680px) {
+  /* Unstick header on mobile so it doesn't consume 30% of the viewport while scrolling */
+  .wb-header {
+    position: relative;
+  }
+
+  .wb-header-inner {
+    padding-block: 10px;
+    gap: 8px;
+  }
+
+  .wb-header-links {
+    width: 100%;
+    gap: 6px;
+  }
+
+  .wb-pill-tag {
+    font-size: 0.66rem;
+    padding: 4px 9px;
+  }
+
+  .wb-nav-link {
+    font-size: 0.75rem;
+  }
+
+  .wb-hero {
+    padding: 18px 0 14px;
+    text-align: left;
+  }
+
+  .wb-hero-eyebrow {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+
+  .wb-hero-title {
+    font-size: 1.55rem;
+    margin-bottom: 8px;
+  }
+
+  .wb-hero-subtitle {
+    font-size: 0.84rem;
+    line-height: 1.45;
+  }
+
+  /* Compact 2-column mode selector deck on mobile */
+  .wb-mode-deck {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .wb-mode-card {
+    padding: 9px 11px;
+    border-radius: 11px;
+    gap: 3px;
+  }
+
+  .wb-mode-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .wb-mode-icon {
+    font-size: 1.05rem;
+  }
+
+  .wb-mode-tag {
+    font-size: 0.54rem;
+  }
+
+  .wb-mode-card h3 {
+    font-size: 0.86rem;
+  }
+
+  .wb-mode-card p {
+    font-size: 0.68rem;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Hide desktop-only width resizer on mobile phones */
+  .wb-desktop-only-group {
+    display: none !important;
+  }
+
+  .wb-toolbar {
+    padding: 10px 12px;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .wb-stream-group {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+  }
+
+  .wb-select {
+    width: 100%;
+    font-size: 0.74rem;
+  }
+
+  .wb-stage-wrapper {
+    padding: 4px 0 14px;
+  }
+
+  .wb-telemetry-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 10px 12px;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .wb-mux-box {
+    grid-column: 1 / -1;
+  }
+
+  .wb-mux-row code {
+    max-width: 100%;
+    flex: 1;
+  }
+
+  .wb-mux-custom-loader {
+    padding: 12px;
+  }
+
+  .wb-mux-form {
+    min-width: 0;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .wb-hotkey-bar {
+    padding: 10px 12px;
+    margin-bottom: 24px;
+  }
+
+  .wb-audit-grid,
+  .wb-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+

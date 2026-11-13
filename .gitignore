@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.vite/
+*.log
+.DS_Store
+
+# Exclude large MP4 binaries from Git to keep the open-source repository lightweight.
+# Default showcase streams load directly via Mux HLS; local MP4 contrast reels are live at https://arcanedoma.in/mode/.
+public/videos/*.mp4

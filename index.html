@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MODE — A Video.js v10 Skin for Every Occasion | Arcane Domain</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta
+      name="description"
+      content="MODE is an adaptive Video.js v10 custom skin featuring 5 occasion presets: Movie (Velvet Cinema), Music (15fps Edge-Color & Audio-Reactive Spark), Study (Polyglot i18n, Dual-Captions & Pop-out Transcript), Chill (Liquid Glass), and Base Skeleton (75% Transparent Wireframe)."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://arcanedoma.in/mode/" />
+    <meta property="og:title" content="MODE — A Video.js v10 Skin for Every Occasion" />
+    <meta
+      property="og:description"
+      content="Five context-aware Video.js v10 player presets (Movie, Music, Study, Chill, 75% Skeleton Wireframe) with 15fps edge-color ambilight, Web Audio visualizer, polyglot <media-i18n>, and YouTube-style pop-out transcript notes."
+    />
+    <meta property="og:image" content="https://arcanedoma.in/assets/images/indivision-cover.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MODE — A Video.js v10 Skin for Every Occasion" />
+    <meta
+      name="twitter:description"
+      content="Five context-aware Video.js v10 player presets built on @videojs/html 10.3.0."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="wb-page">
+      <!-- Top Navigation Bar -->
+      <header class="wb-header">
+        <div class="wb-container wb-header-inner">
+          <div class="wb-brand">
+            <img src="./favicon.svg" alt="MODE Emblem" class="wb-favicon-badge" width="28" height="28" />
+            <a href="https://arcanedoma.in" class="wb-logo-link" title="Arcane Domain">
+              <span class="wb-logo-mark">A<span>D</span>.</span>
+            </a>
+            <span class="wb-divider">/</span>
+            <span class="wb-project-name">MODE <span class="wb-badge-v10">Video.js v10</span></span>
+          </div>
+
+          <div class="wb-header-links">
+            <span class="wb-pill-tag wb-pill-license" title="Licensed under Apache License 2.0">
+              ⚖️ Apache-2.0
+            </span>
+            <a href="https://github.com/ArcaneDomain/MODE" target="_blank" rel="noopener" class="wb-pill-tag wb-pill-license" title="View Open-Source Source Code on GitHub">
+              ⬡ GitHub: ArcaneDomain/MODE
+            </a>
+            <a href="https://arcanedoma.in/studio/" class="wb-pill-tag wb-pill-live" title="View MODE skin live in production on Arcane Domain Studio">
+              🟢 Live Site: arcanedoma.in/studio →
+            </a>
+            <a href="#design-thinking" class="wb-nav-link">Design Thinking</a>
+            <a href="#accessibility-audit" class="wb-nav-link">Accessibility Audit</a>
+          </div>
+        </div>
+      </header>
+
+      <main class="wb-container wb-main">
+        <!-- Hero Intro -->
+        <section class="wb-hero">
+          <div class="wb-hero-eyebrow">
+            <span>CONTRA × VIDEO.JS v10 SKINS DESIGN CHALLENGE</span>
+            <span class="wb-dot">•</span>
+            <span>@videojs/html 10.3.0</span>
+          </div>
+          <h1 class="wb-hero-title">
+            <span class="wb-gradient-text">MODE</span> — A Video.js v10 Skin for Every Occasion
+          </h1>
+          <p class="wb-hero-subtitle">
+            Why settle for a single static video player when how we watch changes with every occasion?
+            <strong>MODE</strong> transforms native Video.js v10 web components across five purpose-built environments—whether
+            you are <em>watching a movie</em>, <em>listening to music</em>, <em>studying in multiple languages</em>,
+            <em>just chilling</em>, or stripping down to a <em>75% transparent base skeleton</em>.
+          </p>
+        </section>
+
+        <!-- 5 Mode Selector Cards -->
+        <section class="wb-mode-deck" aria-label="Select Player Mode">
+          <button type="button" class="wb-mode-card is-active" data-wb-mode="movie">
+            <div class="wb-mode-card-top">
+              <span class="wb-mode-icon">🎬</span>
+              <span class="wb-mode-tag">01 // CINEMA</span>
+            </div>
+            <h3>Movie Mode</h3>
+            <p>Deep crimson velvet, royal purple &amp; warm champagne gold. Includes film grain, stage glow &amp; room dimmer.</p>
+          </button>
+
+          <button type="button" class="wb-mode-card" data-wb-mode="music">
+            <div class="wb-mode-card-top">
+              <span class="wb-mode-icon">🎵</span>
+              <span class="wb-mode-tag">02 // CYBER AUDIO</span>
+            </div>
+            <h3>Music Mode</h3>
+            <p>Live 15fps video edge-color extraction reflected on frosted glass + Web Audio spectrum &amp; perimeter spark orbit.</p>
+          </button>
+
+          <button type="button" class="wb-mode-card" data-wb-mode="study">
+            <div class="wb-mode-card-top">
+              <span class="wb-mode-icon">📚</span>
+              <span class="wb-mode-tag">03 // POLYGLOT</span>
+            </div>
+            <h3>Study Mode</h3>
+            <p>Pastel alabaster &amp; slate UI with Video.js v10 <code>&lt;media-i18n&gt;</code>, dual-captions, A–B loop &amp; pop-out transcript notes.</p>
+          </button>
+
+          <button type="button" class="wb-mode-card" data-wb-mode="chill">
+            <div class="wb-mode-card-top">
+              <span class="wb-mode-icon">🌅</span>
+              <span class="wb-mode-tag">04 // LIQUID GLASS</span>
+            </div>
+            <h3>Chill Mode</h3>
+            <p>Floating pill-island liquid glass in sunset amber &amp; twilight lavender with firefly bokeh &amp; Zen Sleep Fade timer.</p>
+          </button>
+
+          <button type="button" class="wb-mode-card" data-wb-mode="skeleton">
+            <div class="wb-mode-card-top">
+              <span class="wb-mode-icon">🦴</span>
+              <span class="wb-mode-tag">05 // WIREFRAME</span>
+            </div>
+            <h3>Skeleton Mode</h3>
+            <p>75% transparent surface with crisp 1px black wireframe, dual-contrast hairline &amp; live 24fps SMPTE timecode.</p>
+          </button>
+        </section>
+
+        <!-- Workbench Control Strip (Video Scenario, Width Resizer, FX, Pin, Mux ID) -->
+        <section class="wb-toolbar" aria-label="Interactive Judge Workbench Controls">
+          <div class="wb-toolbar-group wb-stream-group">
+            <label class="wb-toolbar-label" for="wb-scenario-select">📼 Video Stream / Contrast Test:</label>
+            <select id="wb-scenario-select" class="wb-select">
+              <option value="mux-cosmic">1. Mux Stream (rR8P8mSa... · Storyboard VTT · +1 Bonus)</option>
+              <option value="arcane-sonic">2. Arcane Domain — "The Storm" (Song &amp; Video from album INDIVISION · Mux HLS 1080p)</option>
+              <option value="dyrewood-dark">3. Dyrewood 616 — Gothic Cinema (Dark Footage Contrast Test)</option>
+              <option value="bright-snow">4. High-Key Solar — "Time in Space" by Arcane Domain (Bright Contrast Stress Test)</option>
+            </select>
+          </div>
+
+          <div class="wb-toolbar-group wb-desktop-only-group">
+            <span class="wb-toolbar-label">📐 Responsive Width:</span>
+            <div class="wb-size-pills">
+              <button type="button" class="wb-size-btn" data-wb-width="340">340px Mobile</button>
+              <button type="button" class="wb-size-btn" data-wb-width="520">520px Compact</button>
+              <button type="button" class="wb-size-btn" data-wb-width="760">760px Tablet</button>
+              <button type="button" class="wb-size-btn is-active" data-wb-width="100%">100% Full</button>
+            </div>
+            <input
+              type="range"
+              id="wb-width-slider"
+              class="wb-range-slider"
+              min="320"
+              max="1160"
+              value="1160"
+              aria-label="Resize Player Container Width"
+            />
+            <span id="wb-width-readout" class="wb-mono-readout">100%</span>
+          </div>
+
+          <div class="wb-toolbar-group">
+            <button type="button" id="wb-toggle-fx" class="wb-action-btn is-on">✨ Mode FX: ON</button>
+            <button type="button" id="wb-toggle-pin" class="wb-action-btn">📌 Controls: Hover</button>
+            <label class="wb-color-picker-wrap" title="Customize Video.js v10 --media-accent-color token">
+              <span>🎨 Accent</span>
+              <input type="color" id="wb-accent-picker" value="#e5c158" />
+            </label>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             LIVE VIDEO.JS v10 PLAYER STAGE
+             ============================================================ -->
+        <section class="wb-stage-wrapper">
+          <div id="wb-player-resizable" class="wb-player-resizable">
+            <div id="mode-player-mount"></div>
+          </div>
+        </section>
+
+        <!-- Live Telemetry & Mux Bonus Inspector Bar -->
+        <section class="wb-telemetry-bar">
+          <div class="wb-telemetry-item">
+            <span class="wb-tel-label">ACTIVE MODE</span>
+            <strong id="wb-tel-mode" class="wb-tel-val">MOVIE // VELVET CINEMA</strong>
+          </div>
+          <div class="wb-telemetry-item">
+            <span class="wb-tel-label">LIVE EDGE RGB (15FPS)</span>
+            <div class="wb-tel-swatches">
+              <span id="wb-tel-swatch-1" class="wb-tel-dot"></span>
+              <span id="wb-tel-swatch-2" class="wb-tel-dot"></span>
+              <code id="wb-tel-edge-hex">#b026ff · #00f0ff</code>
+            </div>
+          </div>
+          <div class="wb-telemetry-item">
+            <span class="wb-tel-label">VIDEO.JS v10 &lt;media-i18n&gt;</span>
+            <code id="wb-tel-locale">lang="en" · Dual CC → ES</code>
+          </div>
+          <div class="wb-telemetry-item wb-mux-box">
+            <span class="wb-tel-label">MUX PUBLIC PLAYBACK ID (+1 BONUS)</span>
+            <div class="wb-mux-row">
+              <code id="wb-mux-id-code">rR8P8mSaKDzz02TsftugTUdI00cQPJX00oy</code>
+              <button type="button" id="wb-copy-mux-btn" class="wb-mini-copy-btn">Copy ID</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Custom Mux Playback ID Tester -->
+        <section class="wb-mux-custom-loader">
+          <div class="wb-mux-loader-inner">
+            <div>
+              <strong>📡 Test Any Mux Public Playback ID</strong>
+              <p>Playing official Mux stream &amp; storyboard VTT by default. Paste any Mux Playback ID below to load it into MODE:</p>
+            </div>
+            <form id="wb-mux-form" class="wb-mux-form">
+              <input
+                type="text"
+                id="wb-custom-mux-input"
+                class="wb-mux-input"
+                placeholder="Paste Mux Playback ID (e.g. LRH6O8v9nAchc02njUk59MosxoHhvvReqiFNcqAP01a5w)"
+                value="LRH6O8v9nAchc02njUk59MosxoHhvvReqiFNcqAP01a5w"
+              />
+              <button type="submit" class="wb-mux-load-btn">Load Mux Asset</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- Keyboard Hotkeys & Quick Judge Guide -->
+        <section class="wb-hotkey-bar" aria-label="Keyboard Shortcuts and Interactive Features">
+          <div class="wb-hotkey-title">⌨️ Video.js v10 Keyboard Hotkeys:</div>
+          <div class="wb-hotkey-chips">
+            <span><kbd>Space</kbd> / <kbd>K</kbd> Play/Pause</span>
+            <span><kbd>←</kbd> / <kbd>→</kbd> Seek ±5s</span>
+            <span><kbd>J</kbd> / <kbd>L</kbd> Seek ±10s</span>
+            <span><kbd>↑</kbd> / <kbd>↓</kbd> Volume ±5%</span>
+            <span><kbd>M</kbd> Mute</span>
+            <span><kbd>C</kbd> Captions</span>
+            <span><kbd>F</kbd> Fullscreen</span>
+            <span><kbd>I</kbd> Picture-in-Picture</span>
+            <span><kbd>0</kbd>–<kbd>9</kbd> Seek 0–90%</span>
+            <span><kbd>Esc</kbd> Close Menus</span>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             DESIGN THINKING & ARCHITECTURE WRITEUP
+             ============================================================ -->
+        <section id="design-thinking" class="wb-docs-section">
+          <div class="wb-section-header">
+            <span class="wb-eyebrow">SUBMISSION WRITEUP &amp; RATIONALE</span>
+            <h2>Design Thinking — Why <em>MODE</em>?</h2>
+          </div>
+
+          <div class="wb-quote-card">
+            <div class="wb-quote-header">
+              <span>📋 Short Description (Ready for Contra Submission Form)</span>
+              <button type="button" id="wb-copy-desc-btn" class="wb-mini-copy-btn">Copy Description</button>
+            </div>
+            <p id="wb-submission-blurb">
+              <strong>MODE — A Video.js v10 Skin for Every Occasion:</strong> Video.js powers video across millions of websites, yet a single static skin rarely fits every viewing context. Built on Video.js v10 custom elements (<code>@videojs/html v10.3.0</code>), <strong>MODE</strong> introduces five context-aware presets that adapt typography, geometry, color science, and interactive tooling to how people actually watch: <strong>Movie</strong> (deep crimson velvet and champagne gold with film grain and room dimming), <strong>Music</strong> (frosted cyberpunk glass that samples live video edge pixels at 15fps to reflect ambient colors onto the player chrome alongside a Web Audio spectrum visualizer and orbiting perimeter spark), <strong>Study</strong> (uncluttered pastel alabaster and slate with native Video.js v10 <code>&lt;media-i18n&gt;</code> localization across 11 languages, live dual-caption subtitle translation, a searchable transcript &amp; timestamp bookmark drawer with a YouTube Chat-style <strong>Pop-out window</strong>, and A–B loop repeat), <strong>Chill</strong> (floating pill-island liquid glass with sunset bokeh and a Zen sleep fade timer), and <strong>Skeleton</strong> (a 75% transparent black wireframe with 24fps SMPTE frame timecode). Controls stay hidden until hovered—unless pinned via the built-in "Always Visible Controls" setting—and all mode animations can be toggled on/off or automatically calmed via <code>prefers-reduced-motion</code>.
+            </p>
+          </div>
+
+          <div class="wb-grid-3">
+            <article class="wb-doc-card">
+              <h3>1. Context-First Craft</h3>
+              <p>
+                Every skin makes a trade-off between personality and restraint. Rather than forcing one compromise,
+                <strong>MODE</strong> treats the Video.js v10 media store and custom elements as a living state machine.
+                Switching from <code>data-mode="movie"</code> to <code>data-mode="study"</code> doesn't just swap colors—it
+                dynamically updates the Video.js v10 <code>&lt;media-icon family="..."&gt;</code> set, adjusts concentric
+                border radii (<code>outer = inner + padding</code>), and reveals occasion-specific tools like A–B looping or
+                live audio-reactive canvases.
+              </p>
+            </article>
+
+            <article class="wb-doc-card">
+              <h3>2. Real-Time Edge Color &amp; Sonic Synthesis</h3>
+              <p>
+                In <strong>Music Mode</strong>, an offscreen <code>32×18</code> canvas samples the top, bottom, left, and
+                right edge pixels of the active <code>&lt;video&gt;</code> element at 15fps, boosting chroma and projecting
+                <code>--mode-edge-*</code> CSS custom properties onto the player borders and ambient halo. Paired with a Web
+                Audio API <code>AnalyserNode</code> and Arcane Domain's signature perimeter spark comet trail, the control bar
+                becomes an extension of the music video itself.
+              </p>
+              <p style="margin-top: 0.75rem; font-size: 0.82rem; color: #a1a1aa;">
+                🎵 <strong>Original Music Credits:</strong> Track 2 video and song are <em>"The Storm"</em> from the electronic album <a href="https://arcanedoma.in/indivision/" target="_blank" rel="noopener" style="color: #00f0ff; text-decoration: underline;"><strong>INDIVISION</strong></a> (<a href="https://open.spotify.com/album/3jsIdYxdkdAquafDNr1SHR?si=vb9H_Eq4RCu9wjncdHpH5A" target="_blank" rel="noopener" style="color: #00f0ff; text-decoration: underline;">Spotify</a>) by <strong>Arcane Domain</strong>. The High-Key Solar stress test (Scenario 4) features <a href="https://open.spotify.com/album/57xYoj1g1HOYlxb7sPST2c?si=NB36MzHhRXKmP3Sc39bKKw" target="_blank" rel="noopener" style="color: #00f0ff; text-decoration: underline;"><em>"Time in Space"</em> (Spotify)</a> by <strong>Arcane Domain</strong> (starting ~1 minute into the track).
+              </p>
+            </article>
+
+            <article class="wb-doc-card">
+              <h3>3. Polyglot Learning with Video.js v10 SDK</h3>
+              <p>
+                <strong>Study Mode</strong> showcases Video.js v10's built-in <code>&lt;media-i18n&gt;</code> element and
+                official locale bundles (<code>@videojs/html/i18n/locales/all</code>), allowing instant live switching of UI
+                labels and RTL layout (including Arabic <code>dir="rtl"</code>) without reloading. Students can also enable
+                <strong>Dual-Caption Translation</strong>, search and click timestamped cues or pin notes in the transcript
+                drawer, <strong>pop out</strong> the transcript into a standalone YouTube Chat-style window (<code>↗ Popout</code>),
+                and lock <strong>A–B Loop</strong> segments on the timeline.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             ACCESSIBILITY & REQUIREMENTS AUDIT CHECKLIST
+             ============================================================ -->
+        <section id="accessibility-audit" class="wb-docs-section">
+          <div class="wb-section-header">
+            <span class="wb-eyebrow">25 + 2 POINT RUBRIC VERIFICATION</span>
+            <h2>Accessibility, Usability &amp; Polish Audit</h2>
+          </div>
+
+          <div class="wb-audit-grid">
+            <div class="wb-audit-item">
+              <span class="wb-check">✓</span>
+              <div>
+                <strong>Readable Over Bright &amp; Dark Video</strong>
+                <p>Tested against both dark gothic footage and our High-Key Solar stress test. Even the 75% transparent Skeleton mode pairs a <code>1px solid rgba(0,0,0,0.95)</code> outer wireframe with an inner white hairline and text shadow so controls never vanish over pure white or pitch black frames.</p>
+              </div>
+            </div>
+
+            <div class="wb-audit-item">
+              <span class="wb-check">✓</span>
+              <div>
+                <strong>Full Keyboard Access &amp; Visible Focus</strong>
+                <p>Every button, slider, mode pill, and nested <code>&lt;media-menu&gt;</code> is reachable via <code>Tab</code> / <code>Arrow</code> keys, closes cleanly on <code>Escape</code>, preserves a high-contrast <code>2px solid var(--_accent-color)</code> <code>:focus-visible</code> outline, and supports hotkeys (<code>Space</code>, <code>K</code>, <code>M</code>, <code>F</code>, <code>C</code>, <code>J/L</code>, <code>0-9</code>).</p>
+              </div>
+            </div>
+
+            <div class="wb-audit-item">
+              <span class="wb-check">✓</span>
+              <div>
+                <strong>Responsive <code>@container</code> Layout &amp; 44px Touch Targets</strong>
+                <p>Uses CSS container queries (<code>@container mode-player</code>) so the player adapts to its own width (from <code>320px</code> mobile embeds up to 4K fullscreen), automatically expanding interactive targets to <code>44×44px</code> on coarse pointers (<code>@media (pointer: coarse)</code>).</p>
+              </div>
+            </div>
+
+            <div class="wb-audit-item">
+              <span class="wb-check">✓</span>
+              <div>
+                <strong>Calm on Request (<code>prefers-reduced-motion</code> + Manual FX Toggle)</strong>
+                <p>Every mode includes an explicit <strong>FX: ON / OFF</strong> switch in the top bar and settings menu, and automatically disables all canvas animations, film grain, and transitions when the OS reports <code>@media (prefers-reduced-motion: reduce)</code>.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="wb-footer">
+        <div class="wb-container wb-footer-inner">
+          <div>
+            <strong>MODE — A Video.js v10 Skin for Every Occasion</strong> · Crafted by
+            <a href="https://arcanedoma.in" target="_blank" rel="noopener">Arcane Domain</a>
+          </div>
+          <div class="wb-footer-credits">
+            <span>🎵 Original audio &amp; video: <em>"The Storm"</em> from <a href="https://arcanedoma.in/indivision/" target="_blank" rel="noopener"><strong>INDIVISION</strong></a> (<a href="https://open.spotify.com/album/3jsIdYxdkdAquafDNr1SHR?si=vb9H_Eq4RCu9wjncdHpH5A" target="_blank" rel="noopener">Spotify</a>) · Scenario 4: <a href="https://open.spotify.com/album/57xYoj1g1HOYlxb7sPST2c?si=NB36MzHhRXKmP3Sc39bKKw" target="_blank" rel="noopener"><em>"Time in Space"</em> (Spotify)</a> by Arcane Domain</span>
+          </div>
+          <div>
+            <a href="https://github.com/ArcaneDomain/MODE" target="_blank" rel="noopener">Open Source on GitHub</a> · Licensed under <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">Apache License 2.0</a>
+            · Built with <code>@videojs/html v10.3.0</code>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+
