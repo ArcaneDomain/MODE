@@ -14,7 +14,13 @@ import '@videojs/html/ui/volume-popover';
 
 import { EdgeColorEngine, type EdgeColors } from './engines/EdgeColorEngine';
 import { MusicVisualEngine } from './engines/MusicVisualEngine';
-import { StudyToolsEngine, SUPPORTED_LOCALES } from './engines/StudyToolsEngine';
+import {
+  DEFAULT_POLYGLOT_CUES,
+  StudyToolsEngine,
+  SUPPORTED_LOCALES,
+  type PolyglotCue,
+  type StudyBookmark,
+} from './engines/StudyToolsEngine';
 import { ChillEngine } from './engines/ChillEngine';
 import {
   attachRenditionsBridge,
@@ -33,6 +39,9 @@ export interface ModePlayerConfig {
   videoSrc: string;
   posterSrc?: string;
   storyboardVtt?: string;
+  chaptersVtt?: string;
+  captions?: PolyglotCue[];
+  bookmarks?: StudyBookmark[];
   muxPlaybackId?: string;
   title?: string;
   subtitle?: string;
@@ -96,7 +105,11 @@ export class ModeSkinController {
   private renderMarkup(): void {
     const p = this.prefix;
     const storyboardTrack = this.config.storyboardVtt
-      ? `<track kind="metadata" label="thumbnails" default src="${this.config.storyboardVtt}" />`
+      ? `<track kind="metadata" label="thumbnails" default data-mode-track="thumbnails" src="${this.config.storyboardVtt}" />`
+      : '';
+    const chaptersUrl = 'chaptersVtt' in this.config ? this.config.chaptersVtt : './tracks/chapters-en.vtt';
+    const chaptersTrack = chaptersUrl
+      ? `<track kind="chapters" srclang="en" label="Chapters" default data-mode-track="chapters" src="${chaptersUrl}" />`
       : '';
 
     const localeOptionsHtml = SUPPORTED_LOCALES.map(
@@ -155,7 +168,7 @@ export class ModeSkinController {
               <track kind="subtitles" srclang="fr" label="Français" src="./tracks/captions-fr.vtt" />
               <track kind="subtitles" srclang="de" label="Deutsch" src="./tracks/captions-de.vtt" />
               <track kind="subtitles" srclang="ja" label="日本語" src="./tracks/captions-ja.vtt" />
-              <track kind="chapters" srclang="en" label="Chapters" src="./tracks/chapters-en.vtt" default />
+              ${chaptersTrack}
             </video>
 
             <!-- Poster Image -->
@@ -799,6 +812,12 @@ export class ModeSkinController {
       this.updateStudyUI();
       this.emitState();
     });
+    if (this.config.captions !== undefined || this.config.bookmarks !== undefined) {
+      this.studyEngine.setCues(
+        this.config.captions ?? DEFAULT_POLYGLOT_CUES,
+        this.config.bookmarks,
+      );
+    }
 
     // 4. Chill Bokeh & Sleep Fade Engine
     const sleepReadout = this.root.querySelector(`#${p}-sleep-readout`) as HTMLElement;
@@ -1039,24 +1058,24 @@ export class ModeSkinController {
     }
 
     const showStandardCaptions =
-      showingLang !== null && !(this.currentMode === 'study' && dualOn);
+      cue !== null && showingLang !== null && !(this.currentMode === 'study' && dualOn);
 
     if (liveCaptionBox) {
       liveCaptionBox.style.display = showStandardCaptions ? 'inline-flex' : 'none';
     }
-    if (liveCaptionText && showingLang) {
+    if (liveCaptionText && showingLang && cue) {
       liveCaptionText.textContent =
         cue.translations[showingLang] || cue.translations[primaryLang] || cue.translations.en;
     }
 
     this.containerEl.setAttribute('data-dual-cc', dualOn ? 'on' : 'off');
     if (dualBox) {
-      dualBox.style.display = this.currentMode === 'study' && dualOn ? 'flex' : 'none';
+      dualBox.style.display = cue !== null && this.currentMode === 'study' && dualOn ? 'flex' : 'none';
     }
-    if (primaryEl) {
+    if (primaryEl && cue) {
       primaryEl.textContent = cue.translations[primaryLang] || cue.translations.en;
     }
-    if (targetTextEl) {
+    if (targetTextEl && cue) {
       targetTextEl.textContent = cue.translations[targetLang] || cue.translations.es;
     }
     if (badgeEl) {
@@ -1102,7 +1121,7 @@ export class ModeSkinController {
 
     listEl.innerHTML = cues
       .map((c) => {
-        const isActive = c.id === activeCue.id;
+        const isActive = activeCue ? c.id === activeCue.id : false;
         return `
           <button
             type="button"
@@ -1565,7 +1584,7 @@ export class ModeSkinController {
 
     cuesEl.innerHTML = cues
       .map((c) => {
-        const isActive = c.id === activeCue.id;
+        const isActive = activeCue ? c.id === activeCue.id : false;
         return `
           <button
             type="button"
@@ -1590,7 +1609,7 @@ export class ModeSkinController {
       });
     });
 
-    if (forceRender || this.lastPopoutActiveCueId !== activeCue.id) {
+    if (activeCue && (forceRender || this.lastPopoutActiveCueId !== activeCue.id)) {
       this.lastPopoutActiveCueId = activeCue.id;
       const activeNode = cuesEl.querySelector<HTMLElement>('.pop-cue-item.is-active');
       activeNode?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -1662,10 +1681,100 @@ export class ModeSkinController {
     return this.pinnedControls;
   }
 
+  private appendDynamicTrack(attrs: {
+    kind: 'metadata' | 'chapters';
+    label: string;
+    src: string;
+    srclang?: string;
+    role: string;
+  }): void {
+    const trackEl = document.createElement('track');
+    trackEl.kind = attrs.kind;
+    trackEl.label = attrs.label;
+    if (attrs.srclang) trackEl.srclang = attrs.srclang;
+    trackEl.default = true;
+    trackEl.setAttribute('default', '');
+    trackEl.setAttribute('data-mode-track', attrs.role);
+    trackEl.src = attrs.src;
+
+    const notifyTrackChange = () => {
+      this.videoEl.textTracks?.dispatchEvent?.(new Event('change'));
+    };
+    trackEl.addEventListener('load', notifyTrackChange);
+    trackEl.addEventListener('error', notifyTrackChange);
+
+    this.videoEl.appendChild(trackEl);
+    try {
+      if (trackEl.track) {
+        trackEl.track.mode = 'hidden';
+      }
+    } catch {
+      // Synthetic mocks may expose non-writable track objects
+    }
+    if (trackEl.readyState === 2) {
+      notifyTrackChange();
+    }
+  }
+
+  private syncMetadataAndChapterTracks(storyboardVtt?: string, chaptersVtt?: string): void {
+    const staleTracks = Array.from(this.videoEl.querySelectorAll('track')).filter((tr) => {
+      const kind = tr.getAttribute('kind') || tr.kind;
+      const label = tr.getAttribute('label') || tr.label;
+      const role = tr.getAttribute('data-mode-track');
+      return (
+        role === 'thumbnails'
+        || role === 'chapters'
+        || kind === 'chapters'
+        || (kind === 'metadata' && label === 'thumbnails')
+      );
+    });
+
+    for (const tr of staleTracks) {
+      try {
+        if (tr.track) tr.track.mode = 'disabled';
+      } catch {
+        // Ignore non-writable track state
+      }
+      tr.remove();
+    }
+
+    const thumbEl = this.root.querySelector('media-slider-thumbnail') as (HTMLElement & { thumbnails?: unknown }) | null;
+    if (thumbEl && thumbEl.thumbnails !== undefined) {
+      thumbEl.thumbnails = undefined;
+    }
+
+    // Flush stale storyboard/chapters out of @videojs/core store synchronously before loading new VTTs
+    this.videoEl.textTracks?.dispatchEvent?.(new Event('change'));
+
+    if (storyboardVtt) {
+      this.appendDynamicTrack({
+        kind: 'metadata',
+        label: 'thumbnails',
+        src: storyboardVtt,
+        role: 'thumbnails',
+      });
+    }
+
+    if (chaptersVtt) {
+      this.appendDynamicTrack({
+        kind: 'chapters',
+        label: 'Chapters',
+        srclang: 'en',
+        src: chaptersVtt,
+        role: 'chapters',
+      });
+    }
+
+    this.videoEl.textTracks?.dispatchEvent?.(new Event('change'));
+  }
+
   public setVideoSource(options: {
     src: string;
     poster?: string;
     storyboardVtt?: string;
+    chaptersVtt?: string;
+    captions?: PolyglotCue[];
+    bookmarks?: StudyBookmark[];
     muxPlaybackId?: string;
     recommendedMode?: ModePreset;
   }): void {
@@ -1673,13 +1782,29 @@ export class ModeSkinController {
     const wasPlaying = !this.videoEl.paused;
     this.config.videoSrc = resolvedSrc;
     this.config.posterSrc = options.poster;
+    this.config.storyboardVtt = options.storyboardVtt;
+    this.config.chaptersVtt = options.chaptersVtt;
+    this.config.captions = options.captions;
+    this.config.bookmarks = options.bookmarks;
     this.config.muxPlaybackId = options.muxPlaybackId;
 
     this.loadStreamSource(resolvedSrc);
+    this.syncMetadataAndChapterTracks(options.storyboardVtt, options.chaptersVtt);
+
+    const posterEl = this.root.querySelector('media-poster');
     if (options.poster) {
       this.videoEl.poster = options.poster;
-      const posterEl = this.root.querySelector('media-poster');
       posterEl?.setAttribute('src', options.poster);
+    } else {
+      this.videoEl.removeAttribute('poster');
+      posterEl?.removeAttribute('src');
+    }
+
+    if (options.captions !== undefined || options.bookmarks !== undefined) {
+      this.studyEngine.setCues(
+        options.captions ?? DEFAULT_POLYGLOT_CUES,
+        options.bookmarks,
+      );
     }
 
     if (options.recommendedMode) {

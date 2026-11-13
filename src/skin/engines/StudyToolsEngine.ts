@@ -218,13 +218,23 @@ export class StudyToolsEngine {
     return this.dualCaptionsEnabled;
   }
 
-  public getActiveCue(): PolyglotCue {
-    const dur = this.video.duration && isFinite(this.video.duration) ? this.video.duration : 38;
-    const t = (this.video.currentTime || 0) % Math.max(1, Math.min(dur, 38));
+  public getActiveCue(): PolyglotCue | null {
+    if (this.cues.length === 0) return null;
+    const t = Math.max(0, this.video.currentTime || 0);
     return (
       this.cues.find((c) => t >= c.start && t <= c.end) ||
-      this.cues[0]
+      (t < this.cues[0].start ? this.cues[0] : null)
     );
+  }
+
+  public setCues(cues: PolyglotCue[], bookmarks?: StudyBookmark[]): void {
+    this.cues = cues;
+    if (bookmarks !== undefined) {
+      this.bookmarks = [...bookmarks];
+    }
+    this.pointA = null;
+    this.pointB = null;
+    this.notify();
   }
 
   public getCues(): PolyglotCue[] {

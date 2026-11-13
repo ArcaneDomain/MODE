@@ -7,6 +7,17 @@
 import './skin/mode-skin.css';
 import './workbench.css';
 import { ModeSkinController, type ModePreset, type ModeSkinState } from './skin/mode-skin';
+import type { PolyglotCue, StudyBookmark } from './skin/engines/StudyToolsEngine';
+import {
+  ARCANE_SONIC_BOOKMARKS,
+  ARCANE_SONIC_CUES,
+  BRIGHT_SOLAR_BOOKMARKS,
+  BRIGHT_SOLAR_CUES,
+  DYREWOOD_BOOKMARKS,
+  DYREWOOD_CUES,
+  MUX_DEMO_BOOKMARKS,
+  MUX_DEMO_CUES,
+} from './scenario-cues';
 
 const DEMO_MUX_PLAYBACK_ID = 'rR8P8mSaKDzz02TsftugTUdI00cQPJX00oy';
 const STORM_MUX_PLAYBACK_ID = 'LRH6O8v9nAchc02njUk59MosxoHhvvReqiFNcqAP01a5w';
@@ -17,6 +28,9 @@ interface VideoScenario {
   src: string;
   poster?: string;
   storyboardVtt?: string;
+  chaptersVtt?: string;
+  captions?: PolyglotCue[];
+  bookmarks?: StudyBookmark[];
   muxPlaybackId?: string;
   recommendedMode: ModePreset;
 }
@@ -28,6 +42,9 @@ const SCENARIOS: Record<string, VideoScenario> = {
     src: `https://stream.mux.com/${DEMO_MUX_PLAYBACK_ID}.m3u8`,
     poster: `https://image.mux.com/${DEMO_MUX_PLAYBACK_ID}/thumbnail.webp`,
     storyboardVtt: `https://image.mux.com/${DEMO_MUX_PLAYBACK_ID}/storyboard.vtt`,
+    chaptersVtt: './tracks/mux-demo-chapters.vtt',
+    captions: MUX_DEMO_CUES,
+    bookmarks: MUX_DEMO_BOOKMARKS,
     muxPlaybackId: DEMO_MUX_PLAYBACK_ID,
     recommendedMode: 'movie',
   },
@@ -37,6 +54,9 @@ const SCENARIOS: Record<string, VideoScenario> = {
     src: `https://stream.mux.com/${STORM_MUX_PLAYBACK_ID}.m3u8`,
     poster: `https://image.mux.com/${STORM_MUX_PLAYBACK_ID}/thumbnail.webp`,
     storyboardVtt: `https://image.mux.com/${STORM_MUX_PLAYBACK_ID}/storyboard.vtt`,
+    chaptersVtt: './tracks/chapters-en.vtt',
+    captions: ARCANE_SONIC_CUES,
+    bookmarks: ARCANE_SONIC_BOOKMARKS,
     muxPlaybackId: STORM_MUX_PLAYBACK_ID,
     recommendedMode: 'music',
   },
@@ -45,14 +65,21 @@ const SCENARIOS: Record<string, VideoScenario> = {
     label: '3. Dyrewood 616 — Gothic Cinema (Dark Contrast Test)',
     src: 'https://arcanedoma.in/dyrewood/dyrewood_showcase.mp4',
     poster: 'https://arcanedoma.in/assets/images/directives/dyrewood.jpg',
-    muxPlaybackId: DEMO_MUX_PLAYBACK_ID,
+    storyboardVtt: './tracks/dyrewood-storyboard.vtt',
+    chaptersVtt: './tracks/dyrewood-chapters.vtt',
+    captions: DYREWOOD_CUES,
+    bookmarks: DYREWOOD_BOOKMARKS,
     recommendedMode: 'movie',
   },
   'bright-snow': {
     id: 'bright-snow',
     label: '4. High-Key Solar — "Time in Space" by Arcane Domain (Bright Contrast Stress Test)',
     src: './videos/bright-contrast-test.mp4?v=3',
-    muxPlaybackId: DEMO_MUX_PLAYBACK_ID,
+    poster: './tracks/bright-poster.jpg',
+    storyboardVtt: './tracks/bright-storyboard.vtt',
+    chaptersVtt: './tracks/bright-chapters.vtt',
+    captions: BRIGHT_SOLAR_CUES,
+    bookmarks: BRIGHT_SOLAR_BOOKMARKS,
     recommendedMode: 'skeleton',
   },
 };
@@ -87,6 +114,9 @@ function initWorkbench(): void {
     videoSrc: initialScenario.src,
     posterSrc: initialScenario.poster,
     storyboardVtt: initialScenario.storyboardVtt,
+    chaptersVtt: initialScenario.chaptersVtt,
+    captions: initialScenario.captions,
+    bookmarks: initialScenario.bookmarks,
     muxPlaybackId: initialScenario.muxPlaybackId,
     onStateChange: (state: ModeSkinState) => {
       syncWorkbenchTelemetry(state);
@@ -117,12 +147,15 @@ function initWorkbench(): void {
         src: sc.src,
         poster: sc.poster,
         storyboardVtt: sc.storyboardVtt,
+        chaptersVtt: sc.chaptersVtt,
+        captions: sc.captions,
+        bookmarks: sc.bookmarks,
         muxPlaybackId: sc.muxPlaybackId,
         recommendedMode: sc.recommendedMode,
       });
       const muxCode = document.getElementById('wb-mux-id-code');
-      if (muxCode && sc.muxPlaybackId) {
-        muxCode.textContent = sc.muxPlaybackId;
+      if (muxCode) {
+        muxCode.textContent = sc.muxPlaybackId || 'Direct MP4 (No Mux ID)';
       }
     }
   });
@@ -181,10 +214,14 @@ function initWorkbench(): void {
     let raw = muxInput?.value.trim() || '';
     if (!raw) return;
     const playbackId = raw.replace(/^https?:\/\/stream\.mux\.com\//, '').replace(/\.m3u8.*$/, '');
+    const matchedScenario = Object.values(SCENARIOS).find((s) => s.muxPlaybackId === playbackId);
     controller.setVideoSource({
       src: `https://stream.mux.com/${playbackId}.m3u8`,
       poster: `https://image.mux.com/${playbackId}/thumbnail.webp`,
       storyboardVtt: `https://image.mux.com/${playbackId}/storyboard.vtt`,
+      chaptersVtt: matchedScenario?.chaptersVtt,
+      captions: matchedScenario?.captions ?? [],
+      bookmarks: matchedScenario?.bookmarks ?? [],
       muxPlaybackId: playbackId,
     });
     const muxCode = document.getElementById('wb-mux-id-code');

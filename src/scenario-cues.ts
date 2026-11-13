@@ -1,0 +1,298 @@
+/**
+ * @file scenario-cues.ts
+ * @description Scenario-matched polyglot captions and Study Mode bookmarks for each demo stream.
+ */
+
+import {
+  DEFAULT_POLYGLOT_CUES,
+  type PolyglotCue,
+  type StudyBookmark,
+} from './skin/engines/StudyToolsEngine';
+
+export const ARCANE_SONIC_CUES: PolyglotCue[] = DEFAULT_POLYGLOT_CUES;
+
+export const ARCANE_SONIC_BOOKMARKS: StudyBookmark[] = [
+  { id: 'bm-1', time: 3.0, label: 'Architecture Overview' },
+  { id: 'bm-2', time: 14.0, label: 'Edge Color Sampling' },
+  { id: 'bm-3', time: 22.0, label: 'Polyglot SDK & i18n' },
+];
+
+export const MUX_DEMO_CUES: PolyglotCue[] = [
+  {
+    id: 'mux-1',
+    start: 0,
+    end: 8.5,
+    translations: {
+      en: 'Mux Adaptive HLS — ABR automatically selects the sharpest rendition for your downstream speed.',
+      es: 'HLS adaptativo de Mux — ABR selecciona automáticamente la mejor resolución para tu conexión.',
+      fr: 'HLS adaptatif Mux — l’ABR sélectionne automatiquement la meilleure qualité pour votre débit.',
+      de: 'Mux Adaptive HLS — ABR wählt automatisch die optimale Auflösung für Ihre Bandbreite.',
+      ja: 'Mux Adaptive HLS — ABRが回線速度に合わせて最適な画質を自動選択します。',
+      ar: 'بث Mux التكيفي — يختار تلقائيًا أفضل دقة تناسب سرعة التنزيل لديك.',
+      'zh-CN': 'Mux 自适应 HLS —— 根据您的下行带宽自动匹配最佳清晰度。',
+      'pt-BR': 'HLS adaptativo do Mux — ABR escolhe automaticamente a melhor qualidade para sua conexão.',
+      ru: 'Адаптивный Mux HLS — ABR автоматически подбирает лучшее качество под скорость сети.',
+      ko: 'Mux 적응형 HLS — ABR이 다운로드 속도에 맞춰 최적의 화질을 자동 선택합니다.',
+      uk: 'Адаптивний Mux HLS — ABR автоматично обирає найкращу якість під вашу швидкість.',
+    },
+  },
+  {
+    id: 'mux-2',
+    start: 8.5,
+    end: 17.0,
+    translations: {
+      en: 'Hover the segmented chapter bar to preview real WebVTT storyboard frames across the timeline.',
+      es: 'Pasa el cursor por los capítulos para previsualizar miniaturas WebVTT reales en la línea temporal.',
+      fr: 'Survolez les chapitres pour prévisualiser les vignettes WebVTT réelles sur la timeline.',
+      de: 'Fahren Sie über die Kapitel, um echte WebVTT-Storyboard-Vorschaubilder anzuzeigen.',
+      ja: 'チャプターバーにカーソルを合わせると、実際のWebVTTストーリーボードをプレビューできます。',
+      ar: 'مرر المؤشر فوق الفصول لمعاينة صور المخطط الزمني الحقيقية عبر الخط الزمني.',
+      'zh-CN': '悬停章节进度条即可实时预览该时刻的 WebVTT 缩略图。',
+      'pt-BR': 'Passe o cursor pelos capítulos para ver miniaturas reais do storyboard WebVTT.',
+      ru: 'Наведите курсор на главы для предпросмотра реальных миниатюр WebVTT.',
+      ko: '챕터 바에 마우스를 올리면 타임라인의 실제 WebVTT 썸네일을 미리 볼 수 있습니다.',
+      uk: 'Наведіть курсор на розділи для перегляду реальних мініатюр WebVTT.',
+    },
+  },
+  {
+    id: 'mux-3',
+    start: 17.0,
+    end: 26.0,
+    translations: {
+      en: 'Switch between Movie, Music, Study, Chill, or Skeleton without breaking Video.js v10 native controls.',
+      es: 'Cambia entre Película, Música, Estudio, Chill o Esqueleto sin romper los controles de Video.js v10.',
+      fr: 'Passez de Cinéma à Musique, Étude, Chill ou Squelette sans interrompre les contrôles Video.js v10.',
+      de: 'Wechseln Sie zwischen Movie, Music, Study, Chill und Skeleton mit voller Video.js-v10-Unterstützung.',
+      ja: 'Video.js v10の操作を保ったまま、5つの視聴モードを瞬時に切り替えられます。',
+      ar: 'بدّل بين أوضاع المشاهدة الخمسة مع الحفاظ على عناصر تحكم Video.js v10 الأصلية.',
+      'zh-CN': '在电影、音乐、学习、轻松与骨架五种模式间无缝切换。',
+      'pt-BR': 'Alterne entre Filme, Música, Estudo, Chill e Esqueleto mantendo controles nativos.',
+      ru: 'Переключайтесь между 5 режимами без потери нативных элементов Video.js v10.',
+      ko: 'Video.js v10 기본 컨트롤을 유지한 채 5가지 모드를 즉시 전환하세요.',
+      uk: 'Перемикайтеся між 5 режимами без втрати нативних елементів Video.js v10.',
+    },
+  },
+];
+
+export const MUX_DEMO_BOOKMARKS: StudyBookmark[] = [
+  { id: 'bm-mux-1', time: 1.0, label: 'Mux ABR Handshake' },
+  { id: 'bm-mux-2', time: 9.0, label: 'Storyboard Scrubbing' },
+  { id: 'bm-mux-3', time: 18.0, label: 'Mode Transitions' },
+];
+
+export const DYREWOOD_CUES: PolyglotCue[] = [
+  {
+    id: 'dyre-1',
+    start: 0,
+    end: 8.0,
+    translations: {
+      en: 'Subroutine 616: The Dyrewood Incident — Live developer tech showcase.',
+      es: 'Subroutine 616: El Incidente Dyrewood — Demostración técnica en vivo.',
+      fr: 'Subroutine 616 : L’Incident Dyrewood — Démonstration technique en direct.',
+      de: 'Subroutine 616: Der Dyrewood-Vorfall — Live-Tech-Showcase.',
+      ja: 'Subroutine 616: Dyrewood インシデント — 技術ショーケース。',
+      ar: 'Subroutine 616: حادثة دايروود — عرض تقني حي.',
+      'zh-CN': '子程序 616：Dyrewood 事件 —— 开发者技术实机演示。',
+      'pt-BR': 'Subroutine 616: O Incidente Dyrewood — Showcase técnico.',
+      ru: 'Subroutine 616: Инцидент Дайрвуд — техническая демонстрация.',
+      ko: 'Subroutine 616: 다이어우드 사건 — 기술 쇼케이스.',
+      uk: 'Subroutine 616: Інцидент Дайрвуд — технічна демонстрація.',
+    },
+  },
+  {
+    id: 'dyre-2',
+    start: 8.0,
+    end: 20.0,
+    translations: {
+      en: 'Modular Rive CLI architecture with reusable artboards and component imports.',
+      es: 'Arquitectura modular Rive CLI con mesas de trabajo reutilizables e importación de componentes.',
+      fr: 'Architecture modulaire Rive CLI avec plans de travail réutilisables.',
+      de: 'Modulare Rive-CLI-Architektur mit wiederverwendbaren Artboards.',
+      ja: '再利用可能なアートボードを備えたモジュラー Rive CLI アーキテクチャ。',
+      ar: 'بنية Rive CLI المعيارية مع لوحات رسم قابلة لإعادة الاستخدام.',
+      'zh-CN': '模块化 Rive CLI 架构，支持可复用画板与组件导入。',
+      'pt-BR': 'Arquitetura modular Rive CLI com artboards reutilizáveis.',
+      ru: 'Модульная архитектура Rive CLI с переиспользуемыми артбордами.',
+      ko: '재사용 가능한 아트보드를 갖춘 모듈형 Rive CLI 아키텍처.',
+      uk: 'Модульна архітектура Rive CLI із багаторазовими артбордами.',
+    },
+  },
+  {
+    id: 'dyre-3',
+    start: 20.0,
+    end: 33.0,
+    translations: {
+      en: 'WebGPU GPU Canvas pipeline driving procedural shaders, reflections, and biometric glow.',
+      es: 'Pipeline WebGPU GPU Canvas con shaders procedurales, reflejos y brillo biométrico.',
+      fr: 'Pipeline WebGPU GPU Canvas pilotant des shaders procéduraux et reflets.',
+      de: 'WebGPU-Canvas-Pipeline für prozedurale Shader und dynamische Beleuchtung.',
+      ja: 'WebGPU キャンバスパイプラインによるプロシージャルシェーダー処理。',
+      ar: 'خط أنابيب WebGPU لتشغيل المظللات الإجرائية والإضاءة الديناميكية.',
+      'zh-CN': 'WebGPU 画布管线驱动过程着色器、反射与生物识别光效。',
+      'pt-BR': 'Pipeline WebGPU controlando shaders procedurais e reflexos.',
+      ru: 'Конвейер WebGPU для процедурных шейдеров и динамического освещения.',
+      ko: '절차적 셰이더와 반사를 구동하는 WebGPU 캔버스 파이프라인.',
+      uk: 'Конвеєр WebGPU для процедурних шейдерів і динамічного освітлення.',
+    },
+  },
+  {
+    id: 'dyre-4',
+    start: 33.0,
+    end: 38.5,
+    translations: {
+      en: 'In-Engine 3D Cinematic: Descending into the subterranean containment corridor.',
+      es: 'Cinemática 3D en motor: Descendiendo al corredor de contención subterráneo.',
+      fr: 'Cinématique 3D : Descente dans le couloir de confinement souterrain.',
+      de: '3D-Zwischensequenz: Abstieg in den unterirdischen Sicherheitskorridor.',
+      ja: '3Dシネマティック：地下格納コリドーへの降下。',
+      ar: 'مشهد سينمائي ثلاثي الأبعاد: النزول إلى ممر الاحتواء تحت الأرض.',
+      'zh-CN': '引擎实时 3D 过场：深入地下收容走廊。',
+      'pt-BR': 'Cinemática 3D: Descendo ao corredor de contenção subterrâneo.',
+      ru: '3D-синематик: Спуск в подземный коридор сдерживания.',
+      ko: '인엔진 3D 시네마틱: 지하 격리 회랑으로 하강.',
+      uk: '3D-кінематика: Спуск до підземного коридору стримування.',
+    },
+  },
+  {
+    id: 'dyre-5',
+    start: 38.5,
+    end: 51.5,
+    translations: {
+      en: 'Volumetric fog & Luau scripts: Synchronizing Void, Ash, and Blood Seal wards.',
+      es: 'Niebla volumétrica y scripts Luau: Sincronizando los sellos Vacío, Ceniza y Sangre.',
+      fr: 'Brouillard volumétrique et scripts Luau : Synchronisation des sceaux arcaniques.',
+      de: 'Volumetrischer Nebel & Luau-Skripte: Synchronisierung der drei Siegel.',
+      ja: 'ボリュメトリックフォグと Luau スクリプト：3つの封印を同期。',
+      ar: 'ضباب حجمي ونصوص Luau البرمجية لمزامنة الأختام الثلاثة.',
+      'zh-CN': '体积雾与 Luau 脚本：同步虚空、灰烬与血印三重结界。',
+      'pt-BR': 'Névoa volumétrica e scripts Luau sincronizando os três selos.',
+      ru: 'Объёмный туман и скрипты Luau: синхронизация трёх печатей.',
+      ko: '볼류메트릭 포그 & Luau 스크립트: 3개 봉인 동기화.',
+      uk: 'Об’ємний туман і скрипти Luau: синхронізація трьох печаток.',
+    },
+  },
+  {
+    id: 'dyre-6',
+    start: 51.5,
+    end: 71.0,
+    translations: {
+      en: 'WML data binding & Void Levers: Master Breaker 616 armed for containment purge.',
+      es: 'Vinculación WML y palancas Void: Interruptor Maestro 616 listo para la purga.',
+      fr: 'Liaison de données WML et leviers Void : Disjoncteur Principal 616 armé.',
+      de: 'WML Data Binding & Void-Hebel: Hauptschalter 616 aktiviert.',
+      ja: 'WML データバインディング：マスターブレーカー 616 作動待機。',
+      ar: 'ربط بيانات WML وتجهيز القاطع الرئيسي 616 لعملية التطهير.',
+      'zh-CN': 'WML 数据绑定与虚空拉杆：616 号主断路器已就绪。',
+      'pt-BR': 'Data binding WML e alavancas Void: Disjuntor Mestre 616 armado.',
+      ru: 'Привязка данных WML: Главный рубильник 616 активирован.',
+      ko: 'WML 데이터 바인딩: 마스터 차단기 616 작동 준비.',
+      uk: 'Прив’язка даних WML: Головний вимикач 616 активовано.',
+    },
+  },
+  {
+    id: 'dyre-7',
+    start: 71.0,
+    end: 76.5,
+    translations: {
+      en: 'Master Breaker 616 triggered — Abyssal Singularity collapsed into containment.',
+      es: 'Interruptor Maestro 616 activado — Singularidad Abisal colapsada en contención.',
+      fr: 'Disjoncteur Principal 616 déclenché — Singularité confinée.',
+      de: 'Hauptschalter 616 ausgelöst — Singularität erfolgreich eingedämmt.',
+      ja: 'マスターブレーカー 616 発動 — 特異点を格納完了。',
+      ar: 'تم تفعيل القاطع الرئيسي 616 — احتواء المتفردة بنجاح.',
+      'zh-CN': '616 号主断路器触发 —— 奇点已成功收容。',
+      'pt-BR': 'Disjuntor Mestre 616 acionado — Singularidade contida.',
+      ru: 'Главный рубильник 616 сработал — сингулярность локализована.',
+      ko: '마스터 차단기 616 발동 — 특이점 격리 완료.',
+      uk: 'Головний вимикач 616 спрацював — сингулярність локалізовано.',
+    },
+  },
+  {
+    id: 'dyre-8',
+    start: 76.5,
+    end: 97.0,
+    translations: {
+      en: 'Zero-Gas Web3 engine & Proof of Containment Card #0616 live on arcanedoma.in/dyrewood.',
+      es: 'Motor Web3 sin gas y Tarjeta de Contención #0616 en arcanedoma.in/dyrewood.',
+      fr: 'Moteur Web3 sans frais et Carte de Confinement #0616 sur arcanedoma.in/dyrewood.',
+      de: 'Zero-Gas Web3-Engine & Containment-Karte #0616 live auf arcanedoma.in/dyrewood.',
+      ja: 'ゼロガス Web3 エンジン＆格納証明カード #0616。',
+      ar: 'محرك Web3 بدون رسوم وبطاقة إثبات الاحتواء #0616.',
+      'zh-CN': '零 Gas Web3 引擎与收容证明卡 #0616（arcanedoma.in/dyrewood）。',
+      'pt-BR': 'Motor Web3 sem gás e Cartão de Contenção #0616 em arcanedoma.in/dyrewood.',
+      ru: 'Zero-Gas Web3 и карта сдерживания #0616 на arcanedoma.in/dyrewood.',
+      ko: '제로 가스 Web3 엔진 & 격리 증명 카드 #0616.',
+      uk: 'Zero-Gas Web3 та картка стримування #0616 на arcanedoma.in/dyrewood.',
+    },
+  },
+];
+
+export const DYREWOOD_BOOKMARKS: StudyBookmark[] = [
+  { id: 'bm-dyre-1', time: 8.0, label: 'Rive CLI Architecture' },
+  { id: 'bm-dyre-2', time: 33.0, label: '3D Trench Descent' },
+  { id: 'bm-dyre-3', time: 57.0, label: 'Master Breaker 616' },
+  { id: 'bm-dyre-4', time: 76.5, label: 'Containment Card #0616' },
+];
+
+export const BRIGHT_SOLAR_CUES: PolyglotCue[] = [
+  {
+    id: 'bright-1',
+    start: 0,
+    end: 8.0,
+    translations: {
+      en: 'High-Key Solar Stress Test — "Time in Space" by Arcane Domain (~1:00 extract).',
+      es: 'Prueba de Alto Brillo Solar — "Time in Space" por Arcane Domain.',
+      fr: 'Test Haute Luminosité Solaire — "Time in Space" par Arcane Domain.',
+      de: 'High-Key-Solar-Kontrasttest — „Time in Space“ von Arcane Domain.',
+      ja: 'ハイキー太陽光コントラストテスト — Arcane Domain「Time in Space」。',
+      ar: 'اختبار التباين الساطع — مقطوعة "Time in Space" من Arcane Domain.',
+      'zh-CN': '高光强对比度压力测试 —— Arcane Domain《Time in Space》。',
+      'pt-BR': 'Teste de Alto Brilho Solar — "Time in Space" por Arcane Domain.',
+      ru: 'Тест высокой яркости — «Time in Space» от Arcane Domain.',
+      ko: '하이키 솔라 명암비 테스트 — Arcane Domain "Time in Space".',
+      uk: 'Тест високої яскравості — «Time in Space» від Arcane Domain.',
+    },
+  },
+  {
+    id: 'bright-2',
+    start: 8.0,
+    end: 16.0,
+    translations: {
+      en: 'Inspecting Skeleton 75% wireframe double-outline parity over cyan, pink, and pastel stripes.',
+      es: 'Verificando el doble contorno del modo Esqueleto sobre franjas cian y pastel.',
+      fr: 'Vérification des doubles contours du mode Squelette sur fond clair pastel.',
+      de: 'Prüfung der doppelten Skeleton-Konturen über hellen Pastell- und Weißflächen.',
+      ja: 'シアンやパステル帯の上で75%透過スケルトンの二重線視認性を検証中。',
+      ar: 'فحص وضوح الإطار الشفاف بنسبة 75% فوق الخلفيات الساطعة والألوان الفاتحة.',
+      'zh-CN': '在亮青、粉与高光条纹背景上验证 75% 透明骨架线框的双层描边对比度。',
+      'pt-BR': 'Verificando o contorno duplo do modo Esqueleto sobre faixas claras.',
+      ru: 'Проверка двойной обводки режима Skeleton на светлых и пастельных полосах.',
+      ko: '밝은 파스텔 배경 위에서 75% 투명 스켈레톤 이중 외곽선 시인성 검증 중.',
+      uk: 'Перевірка подвійної обводки Skeleton на яскравих пастельних смугах.',
+    },
+  },
+  {
+    id: 'bright-3',
+    start: 16.0,
+    end: 24.5,
+    translations: {
+      en: 'Outer dark rim + inner white hairline ensure icons & timecodes stay readable over solar white-out.',
+      es: 'El borde oscuro exterior y la línea blanca interior mantienen la lectura clara.',
+      fr: 'Le contour sombre externe et le filet blanc interne garantissent une lisibilité parfaite.',
+      de: 'Äußerer dunkler Rand plus weiße Haarlinie sichern Lesbarkeit bei maximaler Helligkeit.',
+      ja: '外側の暗色縁取りと内側の白線により、白飛び背景でも高い判読性を維持します。',
+      ar: 'الحافة الداكنة الخارجية مع الخط الأبيض تحافظ على وضوح الأيقونات والنصوص.',
+      'zh-CN': '外层深色描边与内层白线协同确保极限高亮画面下图标与时间码依然清晰锐利。',
+      'pt-BR': 'Contorno escuro externo + linha branca garantem leitura perfeita na luz máxima.',
+      ru: 'Внешняя тёмная кайма и белая окантовка сохраняют читаемость на белом фоне.',
+      ko: '바깥 어두운 테두리와 안쪽 흰 선으로 극단적 밝기에서도 가독성을 유지합니다.',
+      uk: 'Зовнішній темний контур і біла лінія зберігають чіткість на білому тлі.',
+    },
+  },
+];
+
+export const BRIGHT_SOLAR_BOOKMARKS: StudyBookmark[] = [
+  { id: 'bm-br-1', time: 1.0, label: 'High-Key Calibration' },
+  { id: 'bm-br-2', time: 9.0, label: 'Checkerboard Contrast' },
+  { id: 'bm-br-3', time: 17.0, label: 'Wireframe Edge Parity' },
+];

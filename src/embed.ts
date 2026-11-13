@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const videoSrc = params.get('src') || `https://stream.mux.com/${STORM_MUX_ID}.m3u8`;
   const posterSrc = params.get('poster') || `https://image.mux.com/${STORM_MUX_ID}/thumbnail.webp`;
   const storyboardVtt = params.get('storyboard') || `https://image.mux.com/${STORM_MUX_ID}/storyboard.vtt`;
+  const chaptersVtt = params.get('chapters') || (videoSrc.includes(STORM_MUX_ID) ? './tracks/chapters-en.vtt' : undefined);
 
   const controller = new ModeSkinController(mount, {
     idPrefix: 'mode-studio',
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     videoSrc,
     posterSrc,
     storyboardVtt,
+    chaptersVtt,
     muxPlaybackId: STORM_MUX_ID,
     onStateChange: (state) => {
       if (window.parent && window.parent !== window) {
@@ -52,6 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
         src: data.src,
         poster: data.poster,
         storyboardVtt: data.storyboardVtt,
+        chaptersVtt: data.chaptersVtt,
+        captions: data.captions,
+        bookmarks: data.bookmarks,
         muxPlaybackId: data.muxPlaybackId,
         recommendedMode: data.recommendedMode,
       });

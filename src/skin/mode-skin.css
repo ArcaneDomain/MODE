@@ -1452,6 +1452,11 @@ body.mode-theater-dimmed .mode-v10-player-host {
   overflow: hidden;
 }
 
+.video-time-slider-thumbnail[hidden],
+.video-time-slider-thumbnail[data-hidden] {
+  display: none !important;
+}
+
 .video-time-slider-value {
   font-family: var(--_mono-family);
   font-size: 0.7rem;
