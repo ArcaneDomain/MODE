@@ -5,8 +5,8 @@
 **License:** [Apache License, Version 2.0](./LICENSE)  
 **Engine:** `@videojs/html@10.3.0` (Video.js v10 Custom Elements)  
 **Live Showcase & Judge's Workbench:** [https://arcanedoma.in/mode/](https://arcanedoma.in/mode/)  
-**Live Production Site Deployment (+1 Bonus):** [https://arcanedoma.in/studio/](https://arcanedoma.in/studio/)  
-**Mux Public Playback ID (+1 Bonus):** `rR8P8mSaKDzz02TsftugTUdI00cQPJX00oy` (Stream 1 Showcase) & `LRH6O8v9nAchc02njUk59MosxoHhvvReqiFNcqAP01a5w` (Stream 2 "The Storm" Master)
+**Live Production Site Deployment:** [https://arcanedoma.in/studio/](https://arcanedoma.in/studio/)  
+**Mux Public Playback ID:** `rR8P8mSaKDzz02TsftugTUdI00cQPJX00oy` (Stream 1 Showcase) & `LRH6O8v9nAchc02njUk59MosxoHhvvReqiFNcqAP01a5w` (Stream 2 "The Storm" Master)
 
 ---
 
@@ -50,6 +50,19 @@ const player = new ModeSkinController(mount, {
   muxPlaybackId: 'LRH6O8v9nAchc02njUk59MosxoHhvvReqiFNcqAP01a5w',
 });
 ```
+
+### Configuration (`ModePlayerConfig`) & Video.js v10 Stack
+
+`ModeSkinController` registers the official `@videojs/html` v10 custom elements (`video/player`, `video/ui`, `i18n/locales/all`, `icons/element`, and `ui/volume-popover`) and bridges `hls.js` adaptive bitrate (ABR) renditions into Video.js v10's quality menu (`hls-renditions.ts`).
+
+Key `ModePlayerConfig` options:
+- `initialMode`: `'movie' | 'music' | 'study' | 'chill' | 'skeleton'`
+- `initialFx` / `initialPinned`: Toggle ambient FX and always-visible control bar on mount
+- `videoSrc` & `posterSrc`: HLS `.m3u8` stream or MP4 source and poster image
+- `storyboardVtt` & `chaptersVtt`: WebVTT storyboard thumbnails for timeline hover previews and chapter markers
+- `captionTracks`: Array of `{ kind, srclang, label, src, default }` WebVTT caption/subtitle tracks
+- `captions` & `bookmarks`: Structured cue and bookmark arrays for Study Mode's searchable transcript drawer
+- `muxPlaybackId`, `title`, `subtitle`, `idPrefix`, `onStateChange`: Optional metadata and state callback
 
 ### Repository Structure
 
